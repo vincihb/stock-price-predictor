@@ -1,0 +1,8 @@
+config/
+.idea
+*.iml
+include
+bin
+venv
+lib
+pyvenv.cfg
