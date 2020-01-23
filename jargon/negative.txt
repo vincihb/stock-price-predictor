@@ -1,0 +1,4 @@
+put
+puts
+bear
+bearish
