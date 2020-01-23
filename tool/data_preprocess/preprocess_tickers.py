@@ -12,6 +12,9 @@ for data_dir in data_dirs:
     for char in alpha:
         with open(base_dir + data_dir + '/' + data_dir + '_' + char + '.txt') as current:
             for line in current:
+                if '-' in line or '.' in line:
+                    continue
+
                 all_tickers.append(line)
 
 # make all the tickers unique and sort them alphabetically
