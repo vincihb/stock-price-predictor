@@ -1,6 +1,6 @@
 import praw
 import json
-from reddit.RedditResponseParser import RedditResponseParser
+from api.reddit.RedditResponseParser import RedditResponseParser
 
 
 class RedditAPI:

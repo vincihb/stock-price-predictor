@@ -13,6 +13,7 @@ ceoddata [DOT] com/stocklist/
 Scraped from Robinhood, of course
 
 ## Last Watchlist
+Also ccraped from Robinhood
 
 ## Special Indices
 We want to exclude these from our general searches because they pollute our data and also... we aren't here to invest in indices

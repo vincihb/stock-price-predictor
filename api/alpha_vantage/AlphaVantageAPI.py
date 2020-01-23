@@ -26,7 +26,7 @@ class AlphaVantageAPI:
     }
 
     def __init__(self):
-        with open('../config/stock_api.json') as json_data:
+        with open('config/stock_api.json') as json_data:
             d = json.load(json_data)
 
         self.API_KEY = d['API_KEY']
