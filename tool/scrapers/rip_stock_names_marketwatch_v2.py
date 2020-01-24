@@ -10,26 +10,25 @@ URL_PATTERN = 'https://www.marketwatch.com/investing/stock/$$TICKER$$/profile'
 TICKER_PATTERN = '$$TICKER$$'
 DESCRIPTION_PATTERN = '$$DESC$$'
 
-executor = SqlExecutor(debug=True)
 UPDATE_SQL = \
-    "UPDATE `COMPANY` SET NAME=?, DESCRIPTION=?, INDUSTRY=?, SECTOR=?, REVENUE=?, NET_INCOME=?, EMPLOYEES=?, RESOURCE_URL=? WHERE TICKER='$$TICKER$$';"
+    "UPDATE `COMPANY` SET NAME=?, DESCRIPTION=?, INDUSTRY=?, SECTOR=?, REVENUE=?, NET_INCOME=?, EMPLOYEES=?, " \
+    "RESOURCE_URL=? WHERE TICKER='$$TICKER$$';"
 
-rows = executor.exec_select('SELECT * FROM COMPANY')
-for row in rows:
-    ticker = row[0]
 
+def update_ticker_metadata(ticker):
+    executor = SqlExecutor(debug=True)
     resource_url = URL_PATTERN.replace(TICKER_PATTERN, ticker)
     html_out = os.popen('curl -s ' + resource_url)
     raw_html = html_out.read()
 
     if '<div class="important">There were no matches found for ' in raw_html:
         print("No data found for ticker %s, skipping..." % ticker)
-        continue
+        return
 
     name = HTMLParser.grep_for(raw_html, 'id="instrumentname"')
     if name == '':
         print("No data found for ticker %s, skipping..." % ticker)
-        continue
+        return
 
     description = HTMLParser.grep_for(raw_html, 'div class="full"', 2)
     industry = HTMLParser.grep_for(raw_html, '>Industry<', 1)
@@ -43,4 +42,9 @@ for row in rows:
 
     print('%s: %s - found and loaded!' % (ticker, name))
 
-    # time.sleep(0.1)
+
+def update_all_tickers():
+    outer_executor = SqlExecutor(debug=True)
+    rows = outer_executor.exec_select('SELECT * FROM COMPANY')
+    for row in rows:
+        update_ticker_metadata(row[0])
