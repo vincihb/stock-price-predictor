@@ -28,17 +28,20 @@ class SqlExecutor:
         cursor.execute(sql)
         return cursor
 
-    def exec_insert(self, sql):
+    def exec_insert(self, sql, with_params=None):
         if self.debug:
             print(sql)
 
-        cursor = self._exec_sql(sql)
+        cursor = self._exec_sql(sql, with_params)
         return cursor.lastrowid
 
-    def _exec_sql(self, sql):
+    def _exec_sql(self, sql, with_params):
         cursor = self.db.cursor()
         with self.db:
-            cursor.execute(sql)
+            if with_params is None:
+                cursor.execute(sql)
+            else:
+                cursor.execute(sql, with_params)
 
         return cursor
 

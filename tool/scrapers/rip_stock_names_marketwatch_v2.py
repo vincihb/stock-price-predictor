@@ -38,9 +38,8 @@ for row in rows:
     net_income = HTMLParser.grep_for(raw_html, 'Net Income', 1)
     revenue = HTMLParser.grep_for(raw_html, '>Revenue<', 1)
 
-    cursor = executor.db.cursor()
-    cursor.execute(UPDATE_SQL, (name, description, industry, sector, revenue, net_income, employees, resource_url))
-    executor.db.commit()
+    sql = UPDATE_SQL.replace(TICKER_PATTERN, ticker)
+    executor.exec_insert(sql, (name, description, industry, sector, revenue, net_income, employees, resource_url))
 
     print('%s: %s - found and loaded!' % (ticker, name))
 
