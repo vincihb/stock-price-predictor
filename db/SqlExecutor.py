@@ -22,7 +22,7 @@ class SqlExecutor:
         with open(path.join(self._local_dir, '..', 'data', 'sqlite', 'sql', 'data_core.sql')) as sql:
             cursor.executescript(sql.read())
 
-    def exec_select(self, sql):
+    def exec_select(self, sql, with_params=None):
         if self.is_closed:
             return None
 
@@ -30,7 +30,11 @@ class SqlExecutor:
             print(sql)
 
         cursor = self.db.cursor()
-        cursor.execute(sql)
+        if with_params is None:
+            cursor.execute(sql)
+        else:
+            cursor.execute(sql, with_params)
+
         return cursor
 
     def exec_insert(self, sql, with_params=None):
