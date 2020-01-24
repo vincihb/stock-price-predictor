@@ -3,9 +3,10 @@ import os.path as path
 
 
 class SqlExecutor:
-    def __init__(self):
+    def __init__(self, debug=False):
         self._local_dir = path.dirname(path.abspath(__file__))
         self._db_path = path.join(self._local_dir, '..', 'data', 'sqlite', 'gpp-core.db')
+        self.debug = debug
 
         db_exists = path.isfile(self._db_path)
 
@@ -18,8 +19,27 @@ class SqlExecutor:
         cursor = self.db.cursor()
         with open(path.join(self._local_dir, '..', 'data', 'sqlite', 'sql', 'data_core.sql')) as sql:
             cursor.executescript(sql.read())
-            cursor.close()
 
     def exec_select(self, sql):
+        if self.debug:
+            print(sql)
+
         cursor = self.db.cursor()
         cursor.execute(sql)
+        return cursor
+
+    def exec_insert(self, sql):
+        if self.debug:
+            print(sql)
+
+        cursor = self._exec_sql(sql)
+        return cursor.lastrowid
+
+    def _exec_sql(self, sql):
+        cursor = self.db.cursor()
+        with self.db:
+            cursor.execute(sql)
+
+        return cursor
+
+

@@ -4,7 +4,7 @@ import requests as req
 import os
 import time
 
-with open('../../data/tickers/compiled/all_tickers.txt') as ticker_file:
+with open('../../../../data/tickers/compiled/all_tickers.txt') as ticker_file:
     with open('../../data/tickers/compiled/tickers_named.txt', 'w') as ticker_file_out:
         for ticker in ticker_file:
             ticker = ticker[:-1]
