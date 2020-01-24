@@ -15,12 +15,17 @@ class SqlExecutor:
         if not db_exists:
             self._exec_core()
 
+        self.is_closed = False
+
     def _exec_core(self):
         cursor = self.db.cursor()
         with open(path.join(self._local_dir, '..', 'data', 'sqlite', 'sql', 'data_core.sql')) as sql:
             cursor.executescript(sql.read())
 
     def exec_select(self, sql):
+        if self.is_closed:
+            return None
+
         if self.debug:
             print(sql)
 
@@ -36,6 +41,9 @@ class SqlExecutor:
         return cursor.lastrowid
 
     def _exec_sql(self, sql, with_params):
+        if self.is_closed:
+            return None
+
         cursor = self.db.cursor()
         with self.db:
             if with_params is None:
@@ -45,4 +53,7 @@ class SqlExecutor:
 
         return cursor
 
+    def close(self):
+        self.db.close()
+        self.is_closed = True
 

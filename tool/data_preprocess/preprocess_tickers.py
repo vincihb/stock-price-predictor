@@ -27,7 +27,7 @@ for ticker in all_tickers:
     ticker_text = ticker_text + ticker
 
 # slice off the first new line
-ticker_text = ticker_text[1:len(ticker_text)]
+ticker_text = ticker_text[1:]
 
 # and write it all back to a compilation file
 with open('../../data/tickers/compiled/all_tickers.txt', 'w') as new_file:
