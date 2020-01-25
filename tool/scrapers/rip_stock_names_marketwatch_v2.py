@@ -1,7 +1,5 @@
 """Marketwatch scraper v2 - uses """
 
-from tool.scrapers.util.HTMLParser import HTMLParser
-import os
 from db.SqlExecutor import SqlExecutor
 from tool.scrapers.util.MarketWatchScraper import MarketWatchScraper
 
@@ -23,7 +21,7 @@ def split_too_long_tickers():
             results = ticker.rsplit(ticker[0])
             results = results[1:]
             for result in results:
-                if result is not '':
+                if result != '':
                     new_name = ticker[0] + result
                     e.exec_insert("INSERT INTO `COMPANY` (`NAME`) VALUES (?)", (new_name,))
                     print(ticker[0] + result)

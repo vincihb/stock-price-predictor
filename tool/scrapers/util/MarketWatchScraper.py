@@ -2,6 +2,7 @@
 from tool.scrapers.util.HTMLParser import HTMLParser
 import os
 from db.SqlExecutor import SqlExecutor
+import time
 
 
 class MarketWatchScraper:
@@ -16,7 +17,9 @@ class MarketWatchScraper:
 
     @staticmethod
     def _curl_for_html(url):
-        html_out = os.popen('curl -s ' + url)
+        # slow down crawls to prevent lockout by marketwatch
+        time.sleep(0.5)
+        html_out = os.popen('curl -s "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (K HTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36" ' + url)
         return html_out.read()
 
     @staticmethod
