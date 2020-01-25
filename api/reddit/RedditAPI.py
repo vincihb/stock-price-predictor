@@ -1,11 +1,15 @@
 import praw
+import path
 import json
 from api.reddit.RedditResponseParser import RedditResponseParser
 
 
 class RedditAPI:
     def __init__(self):
-        with open('config/reddit_api.json') as json_data:
+        self._local_dir = path.dirname(path.abspath(__file__))
+        self._config_path = path.join(self._local_dir, '..', 'config', 'reddit_api.json')
+
+        with open(self._config_path) as json_data:
             data = json.load(json_data)
 
         self.USER = data['username']
