@@ -26,7 +26,7 @@ class HistoricRedditAPI:
     def set_query(self, query):
         self._query = query
 
-    def search_top_level(self):
+    def search_posts(self):
         request = self.api.search_submissions(after=self._start,
                                               subreddit=self._subreddit,
                                               filter=['url', 'author', 'title', 'subreddit', 'body', 'selftext'],

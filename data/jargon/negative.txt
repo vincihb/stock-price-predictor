@@ -4,3 +4,4 @@ bear
 bearish
 loss
 short
+down
