@@ -1,15 +1,15 @@
-// General scraper for ceoddata.com/stocklist/ stock ticker lists
+// General scraper for eoddata.com/ stock ticker lists
 
-const filename = "tsx_"
-const querySelector = 'a[href^="/stockquote/TSX"]'
+const filename = "tsx_";
+const querySelector = 'a[href^="/stockquote/TSX"]';
 
 function scrapeFrom(htmlCollection) {
     let result = Array.from(htmlCollection)
         .map((el) => el.innerText)
         .filter((txt) => txt && !txt.includes('%') && !txt.includes('—'))
-        .reduce((acc, cur) => acc + '\n' + cur, '')
+        .reduce((acc, cur) => acc + '\n' + cur, '');
 
-    result = result.trim()
+    result = result.trim();
 
     download(filename + result[0].toLowerCase() + '.txt', result);
 }
