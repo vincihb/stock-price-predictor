@@ -1,5 +1,7 @@
 from client.util.HTMLUtil import HTMLUtil
 
+BASE_INDENT = 3
+
 
 class ListBuilder:
     UNORDERED = 'unordered'
@@ -16,20 +18,20 @@ class ListBuilder:
 
     def compile(self):
         if self._list_header != '':
-            self._compiled_html = HTMLUtil.wrap_in_tag(self._list_header, 'h2', 1)
+            self._compiled_html = HTMLUtil.wrap_in_tag(self._list_header, 'h2', BASE_INDENT)
 
         if self._list_type == ListBuilder.ORDERED:
-            self._compiled_html += HTMLUtil.get_indent(1) + '<ol>'
+            self._compiled_html += HTMLUtil.get_indent(BASE_INDENT) + '<ol>'
         else:
-            self._compiled_html += HTMLUtil.get_indent(1) + '<ul>'
+            self._compiled_html += HTMLUtil.get_indent(BASE_INDENT) + '<ul>'
 
         for item in self._list_items:
-            self._compiled_html += HTMLUtil.wrap_in_tag(item, 'li', 2)
+            self._compiled_html += HTMLUtil.wrap_in_tag(item, 'li', BASE_INDENT + 1)
 
         if self._list_type == ListBuilder.ORDERED:
-            self._compiled_html += HTMLUtil.get_indent(1) + '</ol>'
+            self._compiled_html += HTMLUtil.get_indent(BASE_INDENT) + '</ol>'
         else:
-            self._compiled_html += HTMLUtil.get_indent(1) + '</ul>'
+            self._compiled_html += HTMLUtil.get_indent(BASE_INDENT) + '</ul>'
 
         return self._compiled_html
 

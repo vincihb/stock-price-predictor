@@ -1,3 +1,6 @@
+BASE_INDENT = 3
+
+
 class TableBuilder:
     def __init__(self, headers=None, rows=None):
         if rows is None:
