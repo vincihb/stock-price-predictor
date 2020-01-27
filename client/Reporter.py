@@ -1,7 +1,5 @@
 from datetime import date
 from os import path
-from client.util.TableBuilder import TableBuilder
-from client.util.ListBuilder import ListBuilder
 
 
 class Reporter:
@@ -31,16 +29,3 @@ class Reporter:
         return self.template.replace('$$__TITLE__$$', self.title, 2)\
                             .replace('$$__BODY__$$', str(self.body))\
                             .replace('$$__HEAD__$$', '')
-
-
-values = [
-    [1, 2, 3],
-    [2, 3, 4],
-    [3, 4, 5],
-]
-
-r = Reporter()
-r.set_title('Wall Street Bets scan 2')
-# r.set_body(TableBuilder(['Sample Header 1', 'Sample Header 2', 'Sample Header 3'], values).compile())
-r.set_body(ListBuilder(['Sample LI 1', 'Sample LI 2', 'Sample LI 3'], list_header='Hello!'))
-r.compile()
