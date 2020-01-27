@@ -21,3 +21,9 @@ class Ticker:
         executor = SqlExecutor()
         result = executor.exec_select('SELECT * FROM COMPANY WHERE TICKER=? AND CLASS=?', (ticker, fd_class))
         return result.fetchone()
+
+    @staticmethod
+    def get_n_stocks(n=5):
+        executor = SqlExecutor()
+        result = executor.exec_select('SELECT * FROM COMPANY WHERE CLASS=? AND NAME IS NOT NULL LIMIT ?', ('STOCK', n))
+        return result.fetchall()
