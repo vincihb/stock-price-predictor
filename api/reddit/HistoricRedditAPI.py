@@ -17,30 +17,32 @@ class HistoricRedditAPI:
     def set_limit(self, limit):
         self._limit = limit
 
-    def set_start_epoch(self, start_date):
-        self._start = start_date
+    def set_start_epoch(self, start_date=dt.datetime(2020, 1, 1)):
+        self._start = int(start_date.timestamp())
 
-    def set_end_date(self, end_date):
-        self._end = end_date
+    def set_end_date(self, end_date=dt.datetime(2020, 1, 1)):
+        self._end = int(end_date.timestamp())
 
     def set_query(self, query):
         self._query = query
 
     def search_posts(self):
-        request = self.api.search_submissions(after=self._start,
-                                              subreddit=self._subreddit,
-                                              filter=['url', 'author', 'title', 'subreddit', 'body', 'selftext'],
-                                              limit=10)
-        return list(request)
+        posts = self.api.search_submissions(after=self._start,
+                                            subreddit=self._subreddit,
+                                            filter=['url', 'author', 'title', 'subreddit', 'body', 'selftext'],
+                                            limit=self._limit)
+        return list(posts)
 
     def search_comments(self):
-        list(self.api.search_comments(after=self._start,
-                                         subreddit=self._subreddit,
-                                         filter=['url', 'author', 'title', 'subreddit', 'body', 'selftext'],
-                                         limit=10))
+        comments = self.api.search_comments(after=self._start,
+                                            subreddit=self._subreddit,
+                                            filter=['url', 'author', 'title', 'subreddit', 'body', 'selftext'],
+                                            limit=self._limit)
+        return list(comments)
 
     def get_something(self):
-        return list(self.api.search_submissions(after=self._start,
-                                    subreddit=self._subreddit,
-                                    filter=['author', 'title', 'subreddit', 'body', 'selftext'],
-                                    limit=10))
+        posts = self.api.search_submissions(after=self._start,
+                                            subreddit=self._subreddit,
+                                            filter=['author', 'title', 'subreddit', 'body', 'selftext'],
+                                            limit=self._limit)
+        return list(posts)
