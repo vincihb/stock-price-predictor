@@ -1,11 +1,5 @@
 from client.util.charts.BaseChart import BaseChart
 
-'''
-    data_set = [
-        { title: string, data: [*] }
-    ]
-'''
-
 
 class BarChart(BaseChart):
     def __init__(self, title='', data_set=None):
@@ -15,6 +9,3 @@ class BarChart(BaseChart):
             data_set = []
 
         self._data_set = data_set
-
-    def compile_data(self):
-        pass

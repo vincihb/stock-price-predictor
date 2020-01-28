@@ -27,20 +27,6 @@ SCRIPT_TEMPLATE = '''
                             display: true,
                             text: '$$__TITLE__$$'
                         },
-                        tooltips: {
-                            intersect: false,
-                            mode: 'index',
-                            callbacks: {
-                                label: function(tooltipItem, myData) {
-                                    var label = myData.datasets[tooltipItem.datasetIndex].label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    label += parseFloat(tooltipItem.value).toFixed(2);
-                                    return label;
-                                }
-                            }
-                        },
                         $$__OPTIONS__$$
                     }
                 });
@@ -49,11 +35,11 @@ SCRIPT_TEMPLATE = '''
 
 COLOR_PATTERN = '$$__COLOR__$$'
 DATA_SET_TEMPLATE = '''{
-                label: '$$__TITLE__$$',
-                backgroundColor: $$__COLOR__$$,
-                borderColor: $$__COLOR__$$,
-                data: $$__DATA__$$
-            },'''
+                                label: '$$__TITLE__$$',
+                                backgroundColor: $$__COLOR__$$,
+                                borderColor: $$__COLOR__$$,
+                                data: $$__DATA__$$
+                            },'''
 
 
 class BaseChart:
@@ -82,24 +68,13 @@ class BaseChart:
 
     def resolve_x_series(self):
         data_length = len(self._ys[0]['data'])
-        try:
+        if 'x' in self._raw_data_set:
             self._x = self._raw_data_set['x']
-        except KeyError:
-            try:
-                self._start_date = self._raw_data_set['start_date']
-                self._x = self.get_date_series_x(self._start_date, data_length)
-            except KeyError:
-                self._x = self.get_dummy_x(data_length)
-
-    def build_script(self):
-        self.get_options()
-
-        self._compiled_script = SCRIPT_TEMPLATE.replace(TITLE_FORMAT, self._title, 2)\
-                                               .replace(TYPE_FORMAT, self._type)\
-                                               .replace(LABEL_FORMAT, str(list(self._x)))\
-                                               .replace(ID_FORMAT, self._id)\
-                                               .replace(DATA_FORMAT, self._data_string)\
-                                               .replace(OPTIONS_FORMAT, self.resolve_options(self.get_options()))
+        elif 'start_date' in self._raw_data_set:
+            self._start_date = self._raw_data_set['start_date']
+            self._x = self.get_date_series_x(self._start_date, data_length)
+        else:
+            self._x = self.get_dummy_x(data_length)
 
     def compile(self):
         self.compile_data()
@@ -107,27 +82,34 @@ class BaseChart:
         self._compiled_html = HTMLUtil.get_indent(1) + self._base_html + HTMLUtil.get_indent(1) + self._compiled_script
         return self._compiled_html
 
-    def get_next_color(self):
-        self._color_index += 1
-        colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'grey']
-        return 'window.chartColors.' + colors[self._color_index % 7]
-
-    # Child classes should override this function to determine how data is converted to be presented to Chart.js in JS
     def compile_data(self):
         self._data_string = ''
         for data in self._ys:
-            color = ''
-            try:
+            if 'color' in data:
                 color = data['color']
-            except KeyError:
+            else:
                 color = self.get_next_color()
 
-            self._data_string += HTMLUtil.get_indent(3) +\
+            self._data_string += HTMLUtil.get_indent(7) +\
                                  self.get_data_set_template().replace(TITLE_FORMAT, data['label'])\
                                                              .replace(DATA_FORMAT, str(data['data']))\
                                                              .replace(COLOR_PATTERN, color, 2)
 
         self._data_string = self._data_string[:-1]
+
+    def get_next_color(self):
+        self._color_index += 1
+        colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'grey']
+        return 'window.chartColors.' + colors[self._color_index % 7]
+
+    def build_script(self):
+        self.get_options()
+        self._compiled_script = SCRIPT_TEMPLATE.replace(TITLE_FORMAT, self._title, 2)\
+                                               .replace(TYPE_FORMAT, self._type)\
+                                               .replace(LABEL_FORMAT, str(list(self._x)))\
+                                               .replace(ID_FORMAT, self._id)\
+                                               .replace(DATA_FORMAT, self._data_string)\
+                                               .replace(OPTIONS_FORMAT, self.resolve_options(self.get_options()))
 
     # Child classes should override this method to provide custom options for chart.js
     def get_options(self):
@@ -149,7 +131,7 @@ class BaseChart:
     def resolve_options(opts):
         options_str = ''
         for key in opts:
-            options_str += '"' + key + '": ' + BaseChart.resolve_value(opts[key]) + ',\n\t\t\t'
+            options_str += '"' + key + '": ' + BaseChart.resolve_value(opts[key]) + ',' + HTMLUtil.get_indent(6)
 
         return options_str
 
@@ -159,6 +141,8 @@ class BaseChart:
             return 'true'
         elif val is False:
             return 'false'
+        elif 'NOESC:' in val:
+            return val.replace('NOESC:', '')
         else:
             return str(val)
 

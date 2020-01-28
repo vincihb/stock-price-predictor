@@ -1,15 +1,15 @@
 from client.util.charts.BaseChart import BaseChart
 
 DATA_SET_TEMPLATE = '''{
-                label: '$$__TITLE__$$',
-                backgroundColor: $$__COLOR__$$,
-                borderColor: $$__COLOR__$$,
-                data: $$__DATA__$$,
-                fill: false,
-                pointRadius: 0,
-                lineTension: 0,
-                borderWidth: 2
-            },'''
+                                label: '$$__TITLE__$$',
+                                backgroundColor: $$__COLOR__$$,
+                                borderColor: $$__COLOR__$$,
+                                data: $$__DATA__$$,
+                                fill: false,
+                                pointRadius: 0,
+                                lineTension: 0,
+                                borderWidth: 2
+                            },'''
 
 
 class LineChart(BaseChart):
@@ -18,8 +18,22 @@ class LineChart(BaseChart):
 
     def get_options(self):
         return {
-            'fill': False
-        }
+            'fill': False,
+            'tooltips': '''NOESC:{
+                            intersect: false,
+                            mode: 'index',
+                            callbacks: {
+                                label: function(tooltipItem, myData) {
+                                    var label = myData.datasets[tooltipItem.datasetIndex].label || '';
+                                    if (label)
+                                        label += ': ';
+                                    
+                                    label += parseFloat(tooltipItem.value).toFixed(2);
+                                    return label;
+                                }
+                            }
+                        }'''
+            }
 
     def get_data_set_template(self):
         return DATA_SET_TEMPLATE
