@@ -1,6 +1,7 @@
 from client.util.charts.BarChart import BarChart
 from client.util.charts.PieChart import PieChart
 from client.util.charts.ScatterChart import ScatterChart
+from client.util.charts.LineChart import LineChart
 
 
 class ChartBuilder:
@@ -17,5 +18,10 @@ class ChartBuilder:
             self.chart = PieChart(title=self._title, data_set=self._data_set)
         elif self._type == 'scatter':
             self.chart = ScatterChart(title=self._title, data_set=self._data_set)
+        elif self._type == 'line':
+            self.chart = LineChart(title=self._title, data_set=self._data_set)
 
         return self.chart.compile()
+
+    def __str__(self):
+        return self.get_chart()

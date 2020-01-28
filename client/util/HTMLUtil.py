@@ -21,6 +21,6 @@ class HTMLUtil:
         attrs = ''
         if attributes is not None:
             for key in attributes:
-                attrs += ' ' + key + '="' + attributes[key] + '"'
+                attrs += ' ' + str(key) + '="' + str(attributes[key]) + '"'
 
         return attrs
