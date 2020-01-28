@@ -11,7 +11,7 @@ values = [
 count = 0
 for stock in stocks:
     values.append({
-        'label': stock[0],
+        'label': '$' + stock[0],
         'data': [count, count + 5, count + 10, count + 5, count]
     })
 
