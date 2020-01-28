@@ -1,5 +1,5 @@
-from datetime import timedelta
 from client.util.HTMLUtil import HTMLUtil
+from client.util.charts.DataSet import DataSet
 
 TYPE_FORMAT = '$$__TYPE__$$'
 LABEL_FORMAT = '$$__LABELS__$$'
@@ -45,14 +45,16 @@ DATA_SET_TEMPLATE = '''{
 class BaseChart:
     def __init__(self, chart_type='bar', title='', data_set=None):
         if data_set is None:
-            data_set = {'ys': [{'label': 'no data', 'data': []}], 'x': []}
+            data_set = DataSet()
+            data_set.set_x([])
+            data_set.set_ys([{'label': 'no data', 'data': []}])
+        elif isinstance(data_set, dict):
+            data_set = DataSet(from_data=data_set)
 
-        self._raw_data_set = data_set
-        self._ys = data_set['ys']
+        self._raw_data_set = data_set.get_data_dict()
+        self._ys = self._raw_data_set['ys']
 
-        self._start_date = ''
-        self._x = []
-        self.resolve_x_series()
+        self._x = self._raw_data_set['x']
 
         self._type = chart_type
         self._title = title
@@ -65,16 +67,6 @@ class BaseChart:
         self._base_html = HTMLUtil.wrap_in_tag('', 'canvas', indent=3, attributes={'id': self._id})
 
         self._color_index = -1
-
-    def resolve_x_series(self):
-        data_length = len(self._ys[0]['data'])
-        if 'x' in self._raw_data_set:
-            self._x = self._raw_data_set['x']
-        elif 'start_date' in self._raw_data_set:
-            self._start_date = self._raw_data_set['start_date']
-            self._x = self.get_date_series_x(self._start_date, data_length)
-        else:
-            self._x = self.get_dummy_x(data_length)
 
     def compile(self):
         self.compile_data()
@@ -90,10 +82,10 @@ class BaseChart:
             else:
                 color = self.get_next_color()
 
-            self._data_string += HTMLUtil.get_indent(7) +\
-                                 self.get_data_set_template().replace(TITLE_FORMAT, data['label'])\
-                                                             .replace(DATA_FORMAT, str(data['data']))\
-                                                             .replace(COLOR_PATTERN, color, 2)
+            self._data_string += HTMLUtil.get_indent(7) + self.get_data_set_template()\
+                                                              .replace(TITLE_FORMAT, data['label'])\
+                                                              .replace(DATA_FORMAT, str(data['data']))\
+                                                              .replace(COLOR_PATTERN, color, 2)
 
         self._data_string = self._data_string[:-1]
 
@@ -118,14 +110,6 @@ class BaseChart:
     # Child classes should override this method to provide custom data set templates for chart.js
     def get_data_set_template(self):
         return DATA_SET_TEMPLATE
-
-    @staticmethod
-    def get_dummy_x(data_length):
-        return range(0, data_length)
-
-    @staticmethod
-    def get_date_series_x(start_date, data_length):
-        return [str(start_date + timedelta(days=x)) for x in range(data_length)]
 
     @staticmethod
     def resolve_options(opts):
