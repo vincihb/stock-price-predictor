@@ -1,5 +1,5 @@
 from api.local_stocks.Ticker import Ticker
-from client.util.ListBuilder import ListBuilder
+from client.util.html.ListBuilder import ListBuilder
 from client.Reporter import Reporter
 
 t = Ticker()
