@@ -23,6 +23,10 @@ var chart = new Chart(ctx, {
     },
 
     options: {
+        title: {
+            display: true,
+            text: '$$__TITLE__$$'
+        },
         $$__OPTIONS__$$
     }
 });
@@ -76,12 +80,12 @@ class BaseChart:
     def build_script(self):
         self.get_options()
 
-        self._compiled_script = SCRIPT_TEMPLATE.replace(TITLE_FORMAT, self._title)\
-                                                     .replace(TYPE_FORMAT, self._type)\
-                                                     .replace(LABEL_FORMAT, str(list(self._x)))\
-                                                     .replace(ID_FORMAT, self._id)\
-                                                     .replace(DATA_FORMAT, self._data_string)\
-                                                     .replace(OPTIONS_FORMAT, self.resolve_options(self.get_options()))
+        self._compiled_script = SCRIPT_TEMPLATE.replace(TITLE_FORMAT, self._title, 2)\
+                                               .replace(TYPE_FORMAT, self._type)\
+                                               .replace(LABEL_FORMAT, str(list(self._x)))\
+                                               .replace(ID_FORMAT, self._id)\
+                                               .replace(DATA_FORMAT, self._data_string)\
+                                               .replace(OPTIONS_FORMAT, self.resolve_options(self.get_options()))
 
     def compile(self):
         self.compile_data()
@@ -124,7 +128,7 @@ class BaseChart:
 
     @staticmethod
     def get_date_series_x(start_date, data_length):
-        return [start_date - timedelta(days=x) for x in range(data_length)]
+        return [str(start_date + timedelta(days=x)) for x in range(data_length)]
 
     @staticmethod
     def resolve_options(opts):
