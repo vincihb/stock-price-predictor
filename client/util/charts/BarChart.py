@@ -9,3 +9,16 @@ class BarChart(BaseChart):
             data_set = []
 
         self._data_set = data_set
+
+    def get_options(self):
+        return {
+            'scales': '''NOESC:{
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                        callback: function (value) { if (Number.isInteger(value)) { return value; } },
+                        stepSize: 1
+                    }
+                }]
+            }\n'''
+        }
