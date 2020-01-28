@@ -5,7 +5,10 @@ DATA_SET_TEMPLATE = '''{
                 backgroundColor: $$__COLOR__$$,
                 borderColor: $$__COLOR__$$,
                 data: $$__DATA__$$,
-                fill: false
+                fill: false,
+                pointRadius: 0,
+                lineTension: 0,
+                borderWidth: 2
             },'''
 
 

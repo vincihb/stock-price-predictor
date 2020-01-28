@@ -9,27 +9,41 @@ DATA_FORMAT = '$$__DATA__$$'
 OPTIONS_FORMAT = '$$__OPTIONS__$$'
 SCRIPT_TEMPLATE = '''
             <script>
-var ctx = document.getElementById('$$__ID__$$').getContext('2d');
-var chart = new Chart(ctx, {
-    // The type of chart we want to create
-    type: '$$__TYPE__$$',
-
-    // The data for our dataset
-    data: {
-        labels: $$__LABELS__$$,
-        datasets: [
-            $$__DATA__$$
-        ]
-    },
-
-    options: {
-        title: {
-            display: true,
-            text: '$$__TITLE__$$'
-        },
-        $$__OPTIONS__$$
-    }
-});
+                var ctx = document.getElementById('$$__ID__$$').getContext('2d');
+                var chart = new Chart(ctx, {
+                    // The type of chart we want to create
+                    type: '$$__TYPE__$$',
+                
+                    // The data for our dataset
+                    data: {
+                        labels: $$__LABELS__$$,
+                        datasets: [
+                            $$__DATA__$$
+                        ]
+                    },
+                
+                    options: {
+                        title: {
+                            display: true,
+                            text: '$$__TITLE__$$'
+                        },
+                        tooltips: {
+                            intersect: false,
+                            mode: 'index',
+                            callbacks: {
+                                label: function(tooltipItem, myData) {
+                                    var label = myData.datasets[tooltipItem.datasetIndex].label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += parseFloat(tooltipItem.value).toFixed(2);
+                                    return label;
+                                }
+                            }
+                        },
+                        $$__OPTIONS__$$
+                    }
+                });
             </script>
 '''
 
@@ -43,7 +57,7 @@ DATA_SET_TEMPLATE = '''{
 
 
 class BaseChart:
-    def __init__(self, chart_type='bar', title='', data_set=None, start_date=None, date_type='day'):
+    def __init__(self, chart_type='bar', title='', data_set=None):
         if data_set is None:
             data_set = {'ys': [{'label': 'no data', 'data': []}], 'x': []}
 
@@ -108,7 +122,8 @@ class BaseChart:
             except KeyError:
                 color = self.get_next_color()
 
-            self._data_string += self.get_data_set_template().replace(TITLE_FORMAT, data['label'])\
+            self._data_string += HTMLUtil.get_indent(3) +\
+                                 self.get_data_set_template().replace(TITLE_FORMAT, data['label'])\
                                                              .replace(DATA_FORMAT, str(data['data']))\
                                                              .replace(COLOR_PATTERN, color, 2)
 
