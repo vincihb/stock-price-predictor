@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import timedelta
 from client.util.HTMLUtil import HTMLUtil
 
 TYPE_FORMAT = '$$__TYPE__$$'
@@ -8,7 +8,7 @@ TITLE_FORMAT = '$$__TITLE__$$'
 DATA_FORMAT = '$$__DATA__$$'
 OPTIONS_FORMAT = '$$__OPTIONS__$$'
 SCRIPT_TEMPLATE = '''
-<script>
+            <script>
 var ctx = document.getElementById('$$__ID__$$').getContext('2d');
 var chart = new Chart(ctx, {
     // The type of chart we want to create
@@ -23,10 +23,14 @@ var chart = new Chart(ctx, {
     },
 
     options: {
+        title: {
+            display: true,
+            text: '$$__TITLE__$$'
+        },
         $$__OPTIONS__$$
     }
 });
-</script>
+            </script>
 '''
 
 COLOR_PATTERN = '$$__COLOR__$$'
@@ -45,10 +49,10 @@ class BaseChart:
 
         self._raw_data_set = data_set
         self._ys = data_set['ys']
-        try:
-            self._x = data_set['x']
-        except KeyError:
-            self._x = self.get_dummy_x(len(self._ys[0]['data']))
+
+        self._start_date = ''
+        self._x = []
+        self.resolve_x_series()
 
         self._type = chart_type
         self._title = title
@@ -58,39 +62,41 @@ class BaseChart:
         self._compiled_html = ''
         self._compiled_script = ''
         self._data_string = ''
-        self._base_html = HTMLUtil.wrap_in_tag('', 'canvas', indent=1, attributes={'id': self._id})
+        self._base_html = HTMLUtil.wrap_in_tag('', 'canvas', indent=3, attributes={'id': self._id})
 
         self._color_index = -1
 
     def resolve_x_series(self):
+        data_length = len(self._ys[0]['data'])
         try:
             self._x = self._raw_data_set['x']
         except KeyError:
-            self._x = self.get_dummy_x(len(self._ys[0]['data']))
+            try:
+                self._start_date = self._raw_data_set['start_date']
+                self._x = self.get_date_series_x(self._start_date, data_length)
+            except KeyError:
+                self._x = self.get_dummy_x(data_length)
 
     def build_script(self):
         self.get_options()
 
-        self._compiled_script = SCRIPT_TEMPLATE.replace(TITLE_FORMAT, self._title)\
-                                                     .replace(TYPE_FORMAT, self._type)\
-                                                     .replace(LABEL_FORMAT, str(list(self._x)))\
-                                                     .replace(ID_FORMAT, self._id)\
-                                                     .replace(DATA_FORMAT, self._data_string)\
-                                                     .replace(OPTIONS_FORMAT, self.resolve_options(self.get_options()))
+        self._compiled_script = SCRIPT_TEMPLATE.replace(TITLE_FORMAT, self._title, 2)\
+                                               .replace(TYPE_FORMAT, self._type)\
+                                               .replace(LABEL_FORMAT, str(list(self._x)))\
+                                               .replace(ID_FORMAT, self._id)\
+                                               .replace(DATA_FORMAT, self._data_string)\
+                                               .replace(OPTIONS_FORMAT, self.resolve_options(self.get_options()))
 
     def compile(self):
         self.compile_data()
         self.build_script()
-        self._compiled_html = self._base_html + HTMLUtil.get_indent(1) + self._compiled_script
+        self._compiled_html = HTMLUtil.get_indent(1) + self._base_html + HTMLUtil.get_indent(1) + self._compiled_script
         return self._compiled_html
 
     def get_next_color(self):
         self._color_index += 1
         colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'grey']
         return 'window.chartColors.' + colors[self._color_index % 7]
-
-    def get_data_set_template(self):
-        return DATA_SET_TEMPLATE
 
     # Child classes should override this function to determine how data is converted to be presented to Chart.js in JS
     def compile_data(self):
@@ -108,16 +114,21 @@ class BaseChart:
 
         self._data_string = self._data_string[:-1]
 
+    # Child classes should override this method to provide custom options for chart.js
+    def get_options(self):
+        return {}
+
+    # Child classes should override this method to provide custom data set templates for chart.js
+    def get_data_set_template(self):
+        return DATA_SET_TEMPLATE
+
     @staticmethod
     def get_dummy_x(data_length):
         return range(0, data_length)
 
     @staticmethod
     def get_date_series_x(start_date, data_length):
-        return [start_date - datetime.timedelta(days=x) for x in range(data_length)]
-
-    def get_options(self):
-        return {}
+        return [str(start_date + timedelta(days=x)) for x in range(data_length)]
 
     @staticmethod
     def resolve_options(opts):
