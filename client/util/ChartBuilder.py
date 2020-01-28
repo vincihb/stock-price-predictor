@@ -6,12 +6,12 @@ from client.util.charts.LineChart import LineChart
 '''
     Data Set Structure for charts:
     {
-        x: [
+        ys: [
             { dataset_label: '', data: [], color: 'optional!|hex|color' }
             ...
         ],
-        y: ['equal', 'number', 'of', 'labels', 'to', 'x', ...] | optional! we can shim this if needed
-        start_date: datetime | optional, if your data is related to dates
+        x: ['equal', 'number', 'of', 'labels', 'to', 'x', ...] | optional! we shim this if needed
+        start_date: datetime | optional, if your data is related to dates, we can auto-populate the x axis with dates
         date_type: 'year', 'month', 'week', 'day' | optional
     }
 '''
