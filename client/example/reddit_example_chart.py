@@ -8,10 +8,11 @@ from client.util.charts.DataSet import DataSet
 from client.util.html.TableBuilder import TableBuilder
 from client.util.html.LinkBuider import LinkBuilder
 
-
+# gather the current top 50 posts from WSB
 reddit = RedditAPI()
 submissions = reddit.get_hot('wallstreetbets', limit=50)
 
+# loop through and try to pick out tickers
 tickers_found = {}
 for sub in range(0, len(submissions['title'])):
     title = submissions['title'][sub]
@@ -22,13 +23,13 @@ for sub in range(0, len(submissions['title'])):
     if match is not None:
         ticker = match.group(0).strip()
 
+        # if we get a match, verify that it's a real ticker
         t = Ticker()
         result = t.get_ticker(ticker)
         if result is None:
             continue
 
-        print(ticker)
-
+        # if it is, write down information about the ticker and how many times we've seen it
         if ticker in tickers_found:
             tickers_found[ticker]['count'] += 1
             tickers_found[ticker]['links'].append(url)
@@ -46,7 +47,7 @@ for sub in range(0, len(submissions['title'])):
 def sort_by_mentions(a):
     return a[1]
 
-
+# then reformat the result so that we can put it in a tabular format
 table_values = []
 for ticker in tickers_found:
     table_values.append([ticker, tickers_found[ticker]['count'], tickers_found[ticker]['name'],
@@ -54,6 +55,7 @@ for ticker in tickers_found:
 
 table_values.sort(key=sort_by_mentions, reverse=True)
 
+# and then mutate the data again to match the data format for bar charts
 x = []
 y = []
 for arr in table_values:
@@ -64,9 +66,14 @@ ds = DataSet()
 ds.set_x(x)
 ds.append_y_set({'data': y, 'label': ''})
 
-table_header = ['Ticker', 'Mentions', 'Name', 'Description']
+# Build the actual report from our parsed data
 report = Reporter()
 report.set_title('Sample Wall Street Bets Report')
+
+# set up a table
+table_header = ['Ticker', 'Mentions', 'Name', 'Description']
 report.set_body(TableBuilder(headers=table_header, rows=table_values))
+
+# and a chart
 report.append_to_body(ChartBuilder(title='WSB Mentions', chart_type='bar', data_set=ds))
 report.compile()
