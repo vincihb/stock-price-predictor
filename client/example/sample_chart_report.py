@@ -18,7 +18,7 @@ for stock in stocks:
     count += 1
 
 data = {
-    'x': values
+    'ys': values
 }
 
 r = Reporter()

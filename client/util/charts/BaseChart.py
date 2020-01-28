@@ -1,3 +1,4 @@
+from datetime import datetime
 from client.util.HTMLUtil import HTMLUtil
 
 TYPE_FORMAT = '$$__TYPE__$$'
@@ -38,16 +39,16 @@ DATA_SET_TEMPLATE = '''{
 
 
 class BaseChart:
-    def __init__(self, chart_type='bar', title='', data_set=None):
+    def __init__(self, chart_type='bar', title='', data_set=None, start_date=None, date_type='day'):
         if data_set is None:
-            data_set = {'x': [{'label': 'no data', 'data': []}], 'y': []}
+            data_set = {'ys': [{'label': 'no data', 'data': []}], 'x': []}
 
         self._raw_data_set = data_set
-        self._xs = data_set['x']
+        self._ys = data_set['ys']
         try:
-            self._y = data_set['y']
+            self._x = data_set['x']
         except KeyError:
-            self._y = self.get_dummy_y(len(self._xs[0]['data']))
+            self._x = self.get_dummy_x(len(self._ys[0]['data']))
 
         self._type = chart_type
         self._title = title
@@ -57,16 +58,22 @@ class BaseChart:
         self._compiled_html = ''
         self._compiled_script = ''
         self._data_string = ''
-        self._base_html = HTMLUtil.wrap_in_tag('', 'canvas', indent=1, attributes={ 'id': self._id })
+        self._base_html = HTMLUtil.wrap_in_tag('', 'canvas', indent=1, attributes={'id': self._id})
 
         self._color_index = -1
+
+    def resolve_x_series(self):
+        try:
+            self._x = self._raw_data_set['x']
+        except KeyError:
+            self._x = self.get_dummy_x(len(self._ys[0]['data']))
 
     def build_script(self):
         self.get_options()
 
         self._compiled_script = SCRIPT_TEMPLATE.replace(TITLE_FORMAT, self._title)\
                                                      .replace(TYPE_FORMAT, self._type)\
-                                                     .replace(LABEL_FORMAT, str(list(self._y)))\
+                                                     .replace(LABEL_FORMAT, str(list(self._x)))\
                                                      .replace(ID_FORMAT, self._id)\
                                                      .replace(DATA_FORMAT, self._data_string)\
                                                      .replace(OPTIONS_FORMAT, self.resolve_options(self.get_options()))
@@ -88,7 +95,7 @@ class BaseChart:
     # Child classes should override this function to determine how data is converted to be presented to Chart.js in JS
     def compile_data(self):
         self._data_string = ''
-        for data in self._xs:
+        for data in self._ys:
             color = ''
             try:
                 color = data['color']
@@ -102,8 +109,12 @@ class BaseChart:
         self._data_string = self._data_string[:-1]
 
     @staticmethod
-    def get_dummy_y(data_length):
+    def get_dummy_x(data_length):
         return range(0, data_length)
+
+    @staticmethod
+    def get_date_series_x(start_date, data_length):
+        return [start_date - datetime.timedelta(days=x) for x in range(data_length)]
 
     def get_options(self):
         return {}
