@@ -7,10 +7,11 @@ from client.util.ChartBuilder import ChartBuilder
 from client.util.charts.DataSet import DataSet
 from client.util.html.TableBuilder import TableBuilder
 from client.util.html.LinkBuider import LinkBuilder
+from client.util.html.ScrollableDiv import ScrollableDiv
 
 # gather the current top 50 posts from WSB
 reddit = RedditAPI()
-submissions = reddit.get_hot('wallstreetbets', limit=50)
+submissions = reddit.get_hot('wallstreetbets', limit=1000)
 
 # loop through and try to pick out tickers
 tickers_found = {}
@@ -18,6 +19,7 @@ for sub in range(0, len(submissions['title'])):
     title = submissions['title'][sub]
     self_text = submissions['body'][sub]
     url = submissions['url'][sub]
+    score = submissions['score'][sub]
 
     match = re.search('[A-Z]{2,4}', title + self_text)
     if match is not None:
@@ -34,13 +36,15 @@ for sub in range(0, len(submissions['title'])):
             tickers_found[ticker]['count'] += 1
             tickers_found[ticker]['links'].append(url)
             tickers_found[ticker]['titles'].append(title)
+            tickers_found[ticker]['score'].append(score)
         else:
             tickers_found[ticker] = {
                 'count': 1,
                 'links': [submissions['url'][sub]],
                 'titles': [title],
                 'name': LinkBuilder(result[1], result[-3]),
-                'description': result[2]
+                'description': result[2],
+                'score': [submissions['score'][sub]]
             }
 
 
@@ -50,8 +54,18 @@ def sort_by_mentions(a):
 # then reformat the result so that we can put it in a tabular format
 table_values = []
 for ticker in tickers_found:
+    addendum = ''
+    for index, link in enumerate(tickers_found[ticker]['links']):
+        addendum += LinkBuilder('[%d] - %d' % (index, tickers_found[ticker]['score'][index]), link).compile() + '<br />'
+
+    addendum = ScrollableDiv(addendum, '5rem').compile()
+
+    desc = '...'
+    if 'description' in tickers_found[ticker] and tickers_found[ticker]['description'] is not None:
+        desc = tickers_found[ticker]['description']
+
     table_values.append([ticker, tickers_found[ticker]['count'], tickers_found[ticker]['name'],
-                         tickers_found[ticker]['description'][:200] + '...'])
+                         desc[:200] + '...', addendum])
 
 table_values.sort(key=sort_by_mentions, reverse=True)
 
@@ -71,7 +85,7 @@ report = Reporter()
 report.set_title('Sample Wall Street Bets Report')
 
 # set up a table
-table_header = ['Ticker', 'Mentions', 'Name', 'Description']
+table_header = ['Ticker', 'Mentions', 'Name', 'Description', 'Links']
 report.set_body(TableBuilder(headers=table_header, rows=table_values))
 
 # and a chart
