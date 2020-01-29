@@ -51,6 +51,7 @@ for sub in range(0, len(submissions['title'])):
 def sort_by_mentions(a):
     return a[1]
 
+
 # then reformat the result so that we can put it in a tabular format
 table_values = []
 for ticker in tickers_found:

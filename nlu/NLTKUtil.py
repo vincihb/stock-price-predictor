@@ -16,9 +16,9 @@ class NLTKUtil:
         return bow
 
     @staticmethod
-    def get_counted_bag_of_words(corpus):
+    def get_counted_bag_of_words(corpus, return_type='dict'):
         bow = NLTKUtil.get_bag_of_words(corpus)
-        return Counter(bow)
-
-corpus = 'Hello my name is hello and that\'s not cool you know hey hello'
-print(NLTKUtil.get_bag_of_words(corpus))
+        if return_type == 'dict':
+            return dict(Counter(bow))
+        else:
+            return Counter(bow)
