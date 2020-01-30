@@ -1,7 +1,15 @@
 import json
 import requests as req
+from os import path
 
-"""Class for calling the AlphaVantage API to retrieve stock data"""
+"""
+Class for calling the AlphaVantage API to retrieve stock data
+Be wary that AlphaVantage is the most restrictive API we use and has strict restrictions on usage
+    Currently they support at maximum 5 requests per minute and 500 requests a day -- we should consider replacing this
+    with a more robust and accessible API if possible
+"""
+
+'''TODO: AV cache to prevent need for going back to the AV server unless expressly needed'''
 
 
 class AlphaVantageAPI:
@@ -26,7 +34,9 @@ class AlphaVantageAPI:
     }
 
     def __init__(self):
-        with open('config/stock_api.json') as json_data:
+        self._local_dir = path.dirname(path.abspath(__file__))
+        self._config_path = path.join(self._local_dir, '..', '..', 'config', 'stock_api.json')
+        with open(self._config_path) as json_data:
             d = json.load(json_data)
 
         self.API_KEY = d['API_KEY']
@@ -39,7 +49,7 @@ class AlphaVantageAPI:
         return self.symbol_request(prepared_url, symbol)
 
     def get_quote(self, symbol):
-        return self.symbol_request(AlphaVantageAPI.QUOTE_URL, symbol)
+        return self.symbol_request(AlphaVantageAPI.QUOTE_URL, symbol)['Global Quote']
 
     def get_weekly_data(self, symbol):
         return self.symbol_request(AlphaVantageAPI.WEEKLY_URL, symbol)
@@ -49,7 +59,7 @@ class AlphaVantageAPI:
 
     def symbol_request(self, url, symbol):
         api_url = url.replace('__SYMBOL__', symbol)
-        return self.make_request(api_url)
+        return json.loads(self.make_request(api_url))
 
     def make_request(self, url):
         final_url = url.replace('__API_KEY__', self.API_KEY)

@@ -1,9 +1,12 @@
 import re
+import time
 
 from api.local_stocks.Ticker import Ticker
 from api.reddit.RedditAPI import RedditAPI
+from api.alpha_vantage.AlphaVantageAPI import AlphaVantageAPI
 from nlu.NLTKUtil import NLTKUtil
 from client.Reporter import Reporter
+from client.util.HTMLUtil import HTMLUtil
 from client.util.ChartBuilder import ChartBuilder
 from client.util.charts.DataSet import DataSet
 from client.util.html.TableBuilder import TableBuilder
@@ -79,8 +82,17 @@ for tf in tickers_found:
     if 'description' in tickers_found[tf] and tickers_found[tf]['description'] is not None:
         desc = tickers_found[tf]['description']
 
+    if tickers_found[tf]['count'] > 2:
+        print('crawling AV for %s' % tf)
+        pct_change = AlphaVantageAPI().get_quote(tf)['10. change percent']
+        pct_in_tag = HTMLUtil.wrap_in_tag(pct_change, 'div', attributes={'class': 'negative' if '-' in pct_change else 'positive'})
+    else:
+        pct_in_tag = 'N/A'
+
     table_values.append([tf, tickers_found[tf]['count'], tickers_found[tf]['name'],
-                         desc[:200] + '...', addendum])
+                         desc[:200] + '...', pct_in_tag, addendum])
+
+    time.sleep(20)
 
 table_values.sort(key=sort_by_mentions, reverse=True)
 
@@ -100,7 +112,7 @@ report = Reporter()
 report.set_title('NLU Report')
 
 # set up a table
-table_header = ['Ticker', 'Mentions', 'Name', 'Description', 'Links']
+table_header = ['Ticker', 'Mentions', 'Name', 'Description', 'Movement', 'Links']
 report.set_body(TableBuilder(headers=table_header, rows=table_values))
 
 # and a chart
