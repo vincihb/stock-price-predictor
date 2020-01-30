@@ -11,6 +11,7 @@ Be wary that AlphaVantage is the most restrictive API we use and has strict rest
 
 '''TODO: AV cache to prevent need for going back to the AV server unless expressly needed'''
 
+'''consider retry loop'''
 
 class AlphaVantageAPI:
     BASE_URL = 'https://www.alphavantage.co/query?'
