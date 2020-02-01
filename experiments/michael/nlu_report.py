@@ -1,6 +1,3 @@
-import re
-
-from api.local_stocks.Ticker import Ticker
 from api.reddit.RedditAPI import RedditAPI
 from api.alpha_vantage.AlphaVantageAPI import AlphaVantageAPI
 from nlu.NLTKUtil import NLTKUtil
@@ -24,17 +21,8 @@ for sub in range(0, len(submissions['title'])):
     url = submissions['url'][sub]
     score = submissions['score'][sub]
 
-    ticker = None
     sorted_bow = NLTKUtil.get_weighted_stock_count(title, self_text)
-    for word in sorted_bow:
-        match = re.search('[A-Z]{2,4}', word)
-        if match is not None:
-            match_result = match.group(0).strip()
-            t = Ticker()
-            result = t.get_ticker(match_result.upper())
-            if result is not None:
-                ticker = result
-                break
+    ticker = NLTKUtil.get_likely_subject_stock(sorted_bow)
 
     if ticker is None:
         continue
@@ -68,6 +56,8 @@ for tf in tickers_found:
 
 # then reformat the result so that we can put it in a tabular format
 table_values = []
+horizontal_x = []
+horizontal_y = []
 for tf in tickers_found:
     addendum = ''
     counter = 0
@@ -84,12 +74,19 @@ for tf in tickers_found:
     if tickers_found[tf]['count'] > 2:
         print('crawling AV for %s' % tf)
         pct_change = AlphaVantageAPI().get_parsed_quote(tf)['10. change percent']
+        horizontal_y.append(pct_change.replace('%', ''))
+        horizontal_x.append(tf)
+
         pct_in_tag = HTMLUtil.wrap_in_tag(pct_change, 'div', attributes={'class': 'negative' if '-' in pct_change else 'positive'})
     else:
         pct_in_tag = 'N/A'
 
     table_values.append([tf, tickers_found[tf]['count'], tickers_found[tf]['name'],
                          desc[:200] + '...', pct_in_tag, addendum])
+
+horizontal_ds = DataSet()
+horizontal_ds.set_x(horizontal_x)
+horizontal_ds.append_y_set({'label': 'Sample', 'data': horizontal_y})
 
 table_values.sort(key=sort_by_mentions, reverse=True)
 
@@ -114,4 +111,7 @@ report.set_body(TableBuilder(headers=table_header, rows=table_values))
 
 # and a chart
 report.append_to_body(ChartBuilder(title='WSB Mentions', chart_type='bar', data_set=ds))
+
+# and another chart
+report.append_to_body(ChartBuilder(title='Stock % Change', chart_type='horizontal-bar', data_set=horizontal_ds))
 report.compile()
