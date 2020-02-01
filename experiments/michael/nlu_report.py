@@ -58,6 +58,7 @@ for tf in tickers_found:
 table_values = []
 horizontal_x = []
 horizontal_y = []
+mentions_to_movement = []
 for tf in tickers_found:
     addendum = ''
     counter = 0
@@ -76,6 +77,10 @@ for tf in tickers_found:
         pct_change = AlphaVantageAPI().get_parsed_quote(tf)['10. change percent']
         horizontal_y.append(pct_change.replace('%', ''))
         horizontal_x.append(tf)
+        mentions_to_movement.append({
+            'data': [{'x': tickers_found[tf]['count'], 'y': pct_change.replace('%', '')}],
+            'label': tf
+        })
 
         pct_in_tag = HTMLUtil.wrap_in_tag(pct_change, 'div', attributes={'class': 'negative' if '-' in pct_change else 'positive'})
     else:
@@ -110,8 +115,15 @@ table_header = ['Ticker', 'Mentions', 'Name', 'Description', 'Movement', 'Links'
 report.set_body(TableBuilder(headers=table_header, rows=table_values))
 
 # and a chart
-report.append_to_body(ChartBuilder(title='WSB Mentions', chart_type='bar', data_set=ds))
+report.append_to_body(ChartBuilder(title='WSB Mentions', chart_type='bar', data_set=ds, y_label='# of Mentions'))
 
 # and another chart
-report.append_to_body(ChartBuilder(title='Stock % Change', chart_type='horizontal-bar', data_set=horizontal_ds))
+report.append_to_body(ChartBuilder(title='Stock % Change', chart_type='horizontal-bar', data_set=horizontal_ds,
+                                   x_label='% Change'))
+
+# and another
+ds_scatter = DataSet()
+ds_scatter.set_ys(mentions_to_movement)
+report.append_to_body(ChartBuilder(title='Mentions vs Movement', chart_type='scatter', data_set=ds_scatter,
+                                   x_label='Mentions', y_label='Movement (%)'))
 report.compile()

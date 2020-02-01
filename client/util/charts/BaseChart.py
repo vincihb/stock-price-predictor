@@ -43,7 +43,7 @@ DATA_SET_TEMPLATE = '''{
 
 
 class BaseChart:
-    def __init__(self, chart_type='bar', title='', data_set=None):
+    def __init__(self, chart_type='bar', title='', data_set=None, x_label='', y_label=''):
         if data_set is None:
             data_set = DataSet()
             data_set.set_x([])
@@ -67,6 +67,9 @@ class BaseChart:
         self._base_html = HTMLUtil.wrap_in_tag('', 'canvas', indent=3, attributes={'id': self._id})
 
         self._color_index = -1
+
+        self._x_label = x_label
+        self._y_label = y_label
 
     def compile(self):
         self.compile_data()
