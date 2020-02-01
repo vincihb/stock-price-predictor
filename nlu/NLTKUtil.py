@@ -68,7 +68,7 @@ class NLTKUtil:
     @staticmethod
     def get_likely_subject_stock(sorted_bow):
         for word in sorted_bow:
-            primary_search = re.search('^\$[A-Z]{1,5}')
+            primary_search = re.search('^\$[A-Z]{1,5}$')
             if primary_search is not None and not any(word in not_ticker for not_ticker in NOT_TICKER_LIST):
                 match_result = primary_search.group(0).strip()
                 t = Ticker()
