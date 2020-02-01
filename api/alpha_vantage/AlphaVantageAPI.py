@@ -12,10 +12,6 @@ Be wary that AlphaVantage is the most restrictive API we use and has strict rest
     with a more robust and accessible API if possible
 """
 
-'''TODO: AV cache to prevent need for going back to the AV server unless expressly needed'''
-
-'''consider retry loop'''
-
 
 class AlphaVantageAPI:
     BASE_URL = 'https://www.alphavantage.co/query?'
@@ -38,6 +34,22 @@ class AlphaVantageAPI:
         'FULL': 'full'
     }
 
+    NOT_FOUND_RESPONSE = {
+        "Global Quote": {
+            "01. symbol": "Not Found",
+            "02. open": "Not Found",
+            "03. high": "Not Found",
+            "04. low": "Not Found",
+            "05. price": "Not Found",
+            "06. volume": "Not Found",
+            "07. latest trading day": "Not Found",
+            "08. previous close": "Not Found",
+            "09. change": "Not Found",
+            "10. change percent": "Not Found"
+        },
+        "Message": "Note that this ticker was not found"
+    }
+
     def __init__(self):
         self._local_dir = path.dirname(path.abspath(__file__))
         self._config_path = path.join(self._local_dir, '..', '..', 'config', 'stock_api.json')
@@ -46,8 +58,10 @@ class AlphaVantageAPI:
 
         self.API_KEY = d['API_KEY']
         self._cache = AVCache()
+        self._last_req_type = None
 
     def get_intraday_data(self, symbol, interval='60min', output_size='compact'):
+        self._last_req_type = 'INTRA'
         prepared_url = AlphaVantageAPI.INTRADAY_URL \
             .replace('__INTERVAL__', interval) \
             .replace('__OUTPUT_SIZE__', output_size)
@@ -55,58 +69,63 @@ class AlphaVantageAPI:
         return self.symbol_request(prepared_url, symbol)
 
     def get_quote(self, symbol):
-        quote = "QUOTE"
-        result = self._cache.check_cache(symbol, quote)
-        if result is not None:
-            print('Found data in cache!')
-            return json.loads(result['payload'])
-        else:
-            result = self.symbol_request(AlphaVantageAPI.QUOTE_URL, symbol)['Global Quote']
-            self._cache.store_result(symbol, quote, json.dumps(result))
-            return result
+        self._last_req_type = 'QUOTE'
+        return self.symbol_request(AlphaVantageAPI.QUOTE_URL, symbol)
+
+    def get_parsed_quote(self, symbol):
+        return self.get_quote(symbol)['Global Quote']
 
     def get_weekly_data(self, symbol):
-        week = 'WEEK'
-        result = self._cache.check_cache(symbol, week)
-        if result is not None:
-            print('Found data in cache!')
-            return json.loads(result['payload'])
-        else:
-            result = self.symbol_request(AlphaVantageAPI.WEEKLY_URL, symbol)
-            self._cache.store_result(symbol, week, json.dumps(result))
-            return result
+        self._last_req_type = 'WEEK'
+        return self.symbol_request(AlphaVantageAPI.WEEKLY_URL, symbol)
 
     def get_daily_data(self, symbol):
-        day = 'DAY'
-        result = self._cache.check_cache(symbol, day)
-        if result is not None:
-            print('Found data in cache!')
-            return json.loads(result['payload'])
-        else:
-            result = self.symbol_request(AlphaVantageAPI.DAILY_URL, symbol)
-            self._cache.store_result(symbol, day, json.dumps(result))
-            return result
+        self._last_req_type = 'DAY'
+        return self.symbol_request(AlphaVantageAPI.DAILY_URL, symbol)
 
     def symbol_request(self, url, symbol, retries=0):
         api_url = url.replace('__SYMBOL__', symbol)
-        result = json.loads(self.make_request(api_url))
-        if 'Global Quote' not in result and 'Meta Data' not in result:
-            if retries < 5:
-                print('AV_API: Retrying for symbol %s, have retried %d/5 times...' % (symbol, retries))
-                time.sleep(5)
-                return self.symbol_request(url, symbol, retries + 1)
-            else:
-                print('AV_API Timeout: Unable to get data for %s within retry limit' % (symbol,))
-                return None
+        result = self.try_cache(symbol)
+        if result is None:
+            result = json.loads(self.make_request(api_url))
+
+            if result == 'Error' or 'Global Quote' not in result and 'Meta Data' not in result:
+                if 'Error Message' in result:
+                    print('Error retrieving data from AV for %s' % (symbol,))
+                    self._cache.store_result(symbol, self._last_req_type, 'NOT_FOUND')
+                    return AlphaVantageAPI.NOT_FOUND_RESPONSE
+
+                if retries < 5:
+                    print('AV_API: Retrying for symbol %s, have retried %d/5 times...' % (symbol, retries))
+                    time.sleep(20)
+                    return self.symbol_request(url, symbol, retries + 1)
+                else:
+                    print('AV_API Timeout: Unable to get data for %s within retry limit' % (symbol,))
+                    return None
+
+            # save what we get to the cache if it's valid
+            self._cache.store_result(symbol, self._last_req_type, json.dumps(result))
 
         return result
+
+    def try_cache(self, symbol):
+        result = self._cache.check_cache(symbol, self._last_req_type)
+        if result is not None:
+            print('Found data in cache!')
+            result = result['payload']
+            if result == 'NOT_FOUND':
+                return AlphaVantageAPI.NOT_FOUND_RESPONSE
+            else:
+                return json.loads(result)
+
+        return None
 
     def make_request(self, url):
         final_url = url.replace('__API_KEY__', self.API_KEY)
         print("AV_API: Request OUT to: %s" % (final_url,))
         result = req.get(final_url)
+        time.sleep(5)
         if result.status_code == req.codes.ok:
             return result.text
         else:
             return 'Error'
-

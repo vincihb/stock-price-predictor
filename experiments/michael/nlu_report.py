@@ -83,7 +83,7 @@ for tf in tickers_found:
 
     if tickers_found[tf]['count'] > 2:
         print('crawling AV for %s' % tf)
-        pct_change = AlphaVantageAPI().get_quote(tf)['10. change percent']
+        pct_change = AlphaVantageAPI().get_parsed_quote(tf)['10. change percent']
         pct_in_tag = HTMLUtil.wrap_in_tag(pct_change, 'div', attributes={'class': 'negative' if '-' in pct_change else 'positive'})
     else:
         pct_in_tag = 'N/A'
