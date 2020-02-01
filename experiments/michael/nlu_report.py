@@ -1,5 +1,4 @@
 import re
-import time
 
 from api.local_stocks.Ticker import Ticker
 from api.reddit.RedditAPI import RedditAPI
@@ -91,8 +90,6 @@ for tf in tickers_found:
 
     table_values.append([tf, tickers_found[tf]['count'], tickers_found[tf]['name'],
                          desc[:200] + '...', pct_in_tag, addendum])
-
-    time.sleep(5)
 
 table_values.sort(key=sort_by_mentions, reverse=True)
 

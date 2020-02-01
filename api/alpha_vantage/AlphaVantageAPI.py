@@ -110,6 +110,3 @@ class AlphaVantageAPI:
         else:
             return 'Error'
 
-
-a = AlphaVantageAPI()
-print(a.get_daily_data('TSLA'))
