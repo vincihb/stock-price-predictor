@@ -3,7 +3,18 @@ from collections import Counter
 from string import punctuation
 import re
 from api.local_stocks.Ticker import Ticker
+from os import path
 
+def create_not_ticker_list():
+    local_path = path.dirname(path.abspath(__file__))
+    path_to_list = path.join(local_path, '..', 'data', 'jargon', 'not_tickers.txt')
+    with open(path_to_list) as file_data:
+         not_tickers_list = [line.strip() for line in file_data]
+
+    return not_tickers_list
+
+
+NOT_TICKER_LIST = create_not_ticker_list()
 
 class NLTKUtil:
     @staticmethod
@@ -58,9 +69,10 @@ class NLTKUtil:
     def get_likely_subject_stock(sorted_bow):
         for word in sorted_bow:
             match = re.search('[A-Z]{1,4}', word)
-            if match is not None:
+            if match is not None and not any(word in not_ticker for not_ticker in NOT_TICKER_LIST):
                 match_result = match.group(0).strip()
                 t = Ticker()
                 result = t.get_ticker(match_result.upper())
                 if result is not None:
                     return result
+
