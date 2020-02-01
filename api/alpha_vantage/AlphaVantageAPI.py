@@ -17,7 +17,8 @@ class AlphaVantageAPI:
     BASE_URL = 'https://www.alphavantage.co/query?'
     QUOTE_URL = BASE_URL + 'function=GLOBAL_QUOTE&apikey=__API_KEY__&symbol=__SYMBOL__'
     WEEKLY_URL = BASE_URL + 'function=TIME_SERIES_WEEKLY&apikey=__API_KEY__&symbol=__SYMBOL__'
-    DAILY_URL = BASE_URL + 'function=TIME_SERIES_DAILY&apikey=__API_KEY__&symbol=__SYMBOL__'
+    DAILY_URL = BASE_URL + 'function=TIME_SERIES_DAILY&symbol=__SYMBOL__&' + \
+                'outputsize=__OUTPUT_SIZE__&apikey=__API_KEY__'
     INTRADAY_URL = BASE_URL + 'function=TIME_SERIES_INTRADAY&symbol=__SYMBOL__&interval=__INTERVAL__&' + \
                    'outputsize=__OUTPUT_SIZE__&apikey=__API_KEY__'
 
