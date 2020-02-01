@@ -68,11 +68,10 @@ class NLTKUtil:
     @staticmethod
     def get_likely_subject_stock(sorted_bow):
         for word in sorted_bow:
-            match = re.search('[A-Z]{1,4}', word)
+            match = re.search('^[A-Z]{2,4}$', word)
             if match is not None and not any(word in not_ticker for not_ticker in NOT_TICKER_LIST):
                 match_result = match.group(0).strip()
                 t = Ticker()
                 result = t.get_ticker(match_result.upper())
                 if result is not None:
                     return result
-
