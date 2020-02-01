@@ -72,7 +72,7 @@ class NLTKUtil:
             if primary_search is not None and not any(word in not_ticker for not_ticker in NOT_TICKER_LIST):
                 match_result = primary_search.group(0).strip()
                 t = Ticker()
-                result = t.get_ticker(match_result.upper())
+                result = t.get_ticker(match_result.upper().replace('$', ''))
                 if result is not None:
                     return result
 
