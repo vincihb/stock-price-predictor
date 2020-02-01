@@ -1,6 +1,8 @@
 from nltk.corpus import stopwords
 from collections import Counter
 from string import punctuation
+import re
+from api.local_stocks.Ticker import Ticker
 
 
 class NLTKUtil:
@@ -51,3 +53,14 @@ class NLTKUtil:
     @staticmethod
     def sort_bow(dictionary):
         return {k: v for k, v in sorted(dictionary.items(), key=lambda item: item[1], reverse=True)}
+
+    @staticmethod
+    def get_likely_subject_stock(sorted_bow):
+        for word in sorted_bow:
+            match = re.search('[A-Z]{1,4}', word)
+            if match is not None:
+                match_result = match.group(0).strip()
+                t = Ticker()
+                result = t.get_ticker(match_result.upper())
+                if result is not None:
+                    return result
