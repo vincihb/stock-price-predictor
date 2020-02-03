@@ -16,7 +16,6 @@ nltk==3.4.5
 numpy==1.16.4
 pandas==0.24.2
 passlib==1.7.1
-path==13.1.0
 post==2019.4.13
 praw==6.5.1
 prawcore==1.0.1
