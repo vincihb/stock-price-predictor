@@ -12,7 +12,9 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
         AlphaVantageAPI.__init__(self)
         self._cache = HAVCache()
 
+    # User needs to input a datetime date class that is converted to a unique ordinal number
     def get_symbol_on_date(self, symbol, date):
+        print("Getting symbol %s" % (symbol,))
         self.symbol_request_on_date(self.DAILY_URL, symbol, date)
 
     def symbol_request_on_date(self, url, symbol, date, retries=0):
@@ -39,6 +41,9 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
             # Loop through the entries, enter them into the database, and stop once you are past
             # the date retrieved
             # save what we get to the cache if it's valid
+            print(result)
+            exit()
+
             self._cache.store_result_data(symbol, date, json.dumps(result))
             self._cache.store_result_meta_data(symbol, datetime.date.today().day)
 

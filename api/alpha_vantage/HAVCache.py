@@ -30,4 +30,3 @@ class HAVCache:
         sql = 'SELECT * FROM `HISTORIC_DATA` WHERE TICKER=? AND DATE=?'
         result = self.db.exec_select(sql, (ticker, date)).fetchone()
         return result
-

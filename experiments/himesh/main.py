@@ -14,9 +14,12 @@ c = historic_reddit.get_something()
 tickers_found = {}
 stemmer = SnowballStemmer("english")
 
-historic_stock_pricing = HistoricAlphaVantageAPI()
+historic_stock_pricing = HistoricAlphaVantageAPI.HistoricAlphaVantageAPI()
+print(dt.date(2020,1,1).toordinal())
+historic_stock_pricing.get_symbol_on_date('TSLA', dt.date(2020, 1, 1).toordinal())
+exit()
 
-PATH = path.dirname(path.abspath(__file__))
+PATH = path.dirname(path.abspath(__file__));
 PATH_POSITIVE = path.join(PATH, '..', '..', 'data', 'jargon', 'positive.txt')
 print(PATH_POSITIVE)
 with open(PATH_POSITIVE) as file_data:
