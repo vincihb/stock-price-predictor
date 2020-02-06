@@ -1,6 +1,7 @@
 import datetime
 from db.SqlExecutor import SqlExecutor
 
+
 class HAVCache:
     def __init__(self):
         self.db = SqlExecutor()
@@ -10,21 +11,25 @@ class HAVCache:
         self.db.exec_insert(sql, (ticker, last_retrieved))
 
     def store_result_data(self, ticker, date, payload):
-        sql = 'INSERT INTO `HISTORIC_DATA` (TICKER, DATE, PAYLOAD) VALUES(?, ?, ?)'
-        self.db.exec_insert(sql, (ticker, date, payload))
+        sql = 'INSERT INTO `HISTORIC_DATA` (TICKER, DATE, OPEN, HIGH, LOW, CLOSE, VOLUME) ' \
+              'VALUES(?, ?, ?, ?, ?, ?, ?)'
+        to_send = (ticker, date)
+        for item in payload:
+            to_send = to_send + (item,)
+        self.db.exec_insert(sql, to_send)
 
+    # Checks whether specific date is actually in the cache
     def check_cache(self, ticker, date):
         sql = 'SELECT * FROM `HISTORIC_META_DATA` WHERE TICKER=?'
-        result = self.db.exec_select(sql, (ticker, date)).fetchone()
+        result = self.db.exec_select(sql, (ticker,)).fetchone()
         if result is None:
             return None
-
-        found_timestamp = datetime.datetime.strptime(result[1], "%Y-%m-%d %H:%M:%S")
-        if found_timestamp.toordinal() < date.toordinal():
+        found_timestamp = result[1]
+        if found_timestamp < date:
             return None
-
         result = self.get_daily_quote(ticker, date)
-        return {'ticker': result[0], 'date': result[1], 'payload': result[2]}
+        return {'ticker': result[0], 'date': result[1], 'open': result[2],
+                'high': result[3], 'low': result[4], 'close': result[5], 'volume': result[6]}
 
     def get_daily_quote(self, ticker, date):
         sql = 'SELECT * FROM `HISTORIC_DATA` WHERE TICKER=? AND DATE=?'

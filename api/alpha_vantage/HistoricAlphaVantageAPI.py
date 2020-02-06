@@ -1,6 +1,6 @@
 from api.alpha_vantage.AlphaVantageAPI import AlphaVantageAPI
 from api.alpha_vantage.HAVCache import HAVCache
-import datetime
+import datetime as dt
 import json
 import time
 
@@ -37,18 +37,29 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
                     print('HAV_API Timeout: Unable to get data for %s within retry limit' % (symbol,))
                     return None
 
-            # Figure out how to put the json file's output into the database
-            # Loop through the entries, enter them into the database, and stop once you are past
-            # the date retrieved
-            # save what we get to the cache if it's valid
-            print(result)
+            self.store_data(symbol, date, result)
+            self.store_meta_data(symbol)
             exit()
-
-            self._cache.store_result_data(symbol, date, json.dumps(result))
-            self._cache.store_result_meta_data(symbol, datetime.date.today().day)
-
         return result
 
+    # Stores the actual data we receive from Alpha Vantage into the cache
+    def store_data(self, symbol, date, result):
+        daily_time_series = result['Time Series (Daily)']
+        for key in daily_time_series:
+            a = ()
+            for item in daily_time_series[key]:
+                a = a + (daily_time_series[key][item],)
+            date_string = key
+            year_time_series = int(date_string[0:4])
+            month_time_series = int(date_string[5:7])
+            day_time_series = int(date_string[8:10])
+            self._cache.store_result_data(symbol, dt.date(year_time_series,
+                                                          month_time_series, day_time_series).toordinal(), a)
+
+    def store_meta_data(self, symbol):
+        return self._cache.store_result_meta_data(symbol, dt.date.today().toordinal())
+
+    # Checks cache for symbol on specific date
     def try_cache(self, symbol, date):
         result = self._cache.check_cache(symbol, date)
         if result is not None:
@@ -58,5 +69,4 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
                 return AlphaVantageAPI.NOT_FOUND_RESPONSE
             else:
                 return json.loads(result)
-
         return None
