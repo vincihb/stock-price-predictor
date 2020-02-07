@@ -16,7 +16,8 @@ stemmer = SnowballStemmer("english")
 
 historic_stock_pricing = HistoricAlphaVantageAPI.HistoricAlphaVantageAPI()
 print(dt.date(2020, 1, 1).toordinal())
-historic_stock_pricing.get_symbol_on_date('TSLA', dt.date(2020, 1, 1).toordinal())
+a = historic_stock_pricing.get_symbol_on_date('TSLA', dt.date(2019, 2, 15).toordinal())
+print(a)
 exit()
 
 PATH = path.dirname(path.abspath(__file__))

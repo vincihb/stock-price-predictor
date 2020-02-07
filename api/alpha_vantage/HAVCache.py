@@ -28,8 +28,17 @@ class HAVCache:
         if found_timestamp < date:
             return None
         result = self.get_daily_quote(ticker, date)
+        print(result)
         return {'ticker': result[0], 'date': result[1], 'open': result[2],
                 'high': result[3], 'low': result[4], 'close': result[5], 'volume': result[6]}
+
+    def get_last_retrieved(self, ticker):
+        sql = 'SELECT * FROM `HISTORIC_META_DATA` WHERE TICKER=?'
+        result = self.db.exec_select(sql, (ticker,)).fetchone()
+        if result is None:
+            return None
+        found_timestamp = result[1]
+        return found_timestamp
 
     def get_daily_quote(self, ticker, date):
         sql = 'SELECT * FROM `HISTORIC_DATA` WHERE TICKER=? AND DATE=?'
