@@ -4,6 +4,7 @@ import requests as req
 from os import path
 
 from api.alpha_vantage.AVCache import AVCache
+from api.meta.APIUsageTracker import APIUsageTracker
 
 """
 Class for calling the AlphaVantage API to retrieve stock data
@@ -14,6 +15,7 @@ Be wary that AlphaVantage is the most restrictive API we use and has strict rest
 
 
 class AlphaVantageAPI:
+    API_CALL_LIMIT = 500
     BASE_URL = 'https://www.alphavantage.co/query?'
     QUOTE_URL = BASE_URL + 'function=GLOBAL_QUOTE&apikey=__API_KEY__&symbol=__SYMBOL__'
     WEEKLY_URL = BASE_URL + 'function=TIME_SERIES_WEEKLY&apikey=__API_KEY__&symbol=__SYMBOL__'
@@ -58,8 +60,15 @@ class AlphaVantageAPI:
             d = json.load(json_data)
 
         self.API_KEY = d['API_KEY']
+        self.usage = self._get_usages()
         self._cache = AVCache()
         self._last_req_type = None
+
+    def get_remaining_api_calls(self):
+        remaining = AlphaVantageAPI.API_CALL_LIMIT - self.usage
+        print('You have used %d/%d requests' % (self.usage, AlphaVantageAPI.API_CALL_LIMIT))
+        print('Leaving %d requests for today' % remaining)
+        return remaining
 
     def get_intraday_data(self, symbol, interval='60min', output_size='compact'):
         self._last_req_type = 'INTRA'
@@ -122,11 +131,25 @@ class AlphaVantageAPI:
         return None
 
     def make_request(self, url):
+        if self.usage >= 500:
+            print('API CALL LIMIT EXCEEDED -- failing out')
+            return 'Error'
+
         final_url = url.replace('__API_KEY__', self.API_KEY)
         print("AV_API: Request OUT to: %s" % (final_url,))
         result = req.get(final_url)
         time.sleep(5)
         if result.status_code == req.codes.ok:
+            # if we get a valid response, bump the usages for the api key
+            self.usage += 1
+            APIUsageTracker().update_use_count(self.API_KEY, self.usage)
             return result.text
         else:
             return 'Error'
+
+    def _get_usages(self):
+        count = APIUsageTracker().get_use_count(self.API_KEY)
+        if count is None:
+            return 0
+        else:
+            return count
