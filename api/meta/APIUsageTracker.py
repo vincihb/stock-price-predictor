@@ -21,7 +21,7 @@ class APIUsageTracker:
         else:
             # if the data is not from today, delete it
             if datetime.datetime.strptime(result[2], '%Y-%m-%d').day != datetime.date.today().day:
-                self._executor.exec_insert('DELETE FROM `API_META` WHERE API_KEY=?', (api_key_hash,))
+                self.clear_metadata_for_key(key)
                 return None
 
             return result[1]
@@ -35,6 +35,10 @@ class APIUsageTracker:
             self._executor.exec_insert('UPDATE `API_META` SET USAGES=? WHERE API_KEY=?', (value, api_key_hash))
 
         return value
+
+    def clear_metadata_for_key(self, key):
+        api_key_hash = self.hash_key(key)
+        self._executor.exec_insert('DELETE FROM `API_META` WHERE API_KEY=?', (api_key_hash,))
 
     @staticmethod
     def hash_key(key):
