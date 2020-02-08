@@ -1,3 +1,6 @@
+from os import path
+
+
 class HTMLUtil:
     @staticmethod
     def wrap_in_tag(data, tag, indent=1, attributes=None, one_line=True):
@@ -24,3 +27,18 @@ class HTMLUtil:
                 attrs += ' ' + str(key) + '="' + str(attributes[key]) + '"'
 
         return attrs
+
+    @staticmethod
+    def get_template(template_name):
+        _local_dir = path.dirname(path.abspath(__file__))
+        file_path = path.join(_local_dir, '..', 'template', template_name)
+        with open(file_path) as template:
+            return template.read()
+
+    @staticmethod
+    def get_report(report_name):
+        _local_dir = path.dirname(path.abspath(__file__))
+        file_path = path.join(_local_dir, '..', 'compiled', report_name)
+        with open(file_path) as template:
+            return template.read()
+
