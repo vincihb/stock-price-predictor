@@ -16,6 +16,7 @@ class HAVCache:
         to_send = (ticker, date)
         for item in payload:
             to_send = to_send + (item,)
+
         self.db.exec_insert(sql, to_send)
 
     # Checks whether specific date is actually in the cache
@@ -24,9 +25,11 @@ class HAVCache:
         result = self.db.exec_select(sql, (ticker,)).fetchone()
         if result is None:
             return None
+
         found_timestamp = result[1]
         if found_timestamp < date:
             return None
+
         result = self.get_daily_quote(ticker, date)
         print(result)
         return {'ticker': result[0], 'date': result[1], 'open': result[2],
@@ -37,6 +40,7 @@ class HAVCache:
         result = self.db.exec_select(sql, (ticker,)).fetchone()
         if result is None:
             return None
+
         found_timestamp = result[1]
         return found_timestamp
 

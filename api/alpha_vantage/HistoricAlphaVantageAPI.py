@@ -77,7 +77,3 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
             return result
 
         return None
-
-
-api = HistoricAlphaVantageAPI()
-api.get_symbol_on_date('MSFT', dt.date(2019, 2, 15).toordinal())
