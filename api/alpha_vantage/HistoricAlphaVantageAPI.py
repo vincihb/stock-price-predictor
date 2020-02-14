@@ -13,15 +13,15 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
         self._cache = HAVCache()
 
     # User needs to input a datetime date class that is converted to a unique ordinal number
-    def get_symbol_on_date(self, symbol, date):
+    def get_symbol_on_date(self, symbol, date, force_reload=False):
         print("Getting symbol %s" % (symbol,))
-        result = self.symbol_request_on_date(self.DAILY_URL, symbol, date)
+        result = self.symbol_request_on_date(self.DAILY_URL, symbol, date, force_reload)
         return result
 
-    def symbol_request_on_date(self, url, symbol, date, retries=0):
+    def symbol_request_on_date(self, url, symbol, date, retries=0, force_reload=False):
         api_url = url.replace('__SYMBOL__', symbol)
         result = self._try_cache(symbol, date)
-        if result is None:
+        if result is None or force_reload is True:
             result = json.loads(self.make_request(api_url))
 
             if result == 'Error' or 'Meta Data' not in result:
