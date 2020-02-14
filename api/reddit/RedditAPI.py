@@ -26,13 +26,26 @@ class RedditAPI:
                            username=self.USER,
                            password=self.PASSWORD)
 
-    def get_new(self, sub_name, limit=100):
+    def get_new(self, sub_name, limit=100, cast_to='dict'):
         sub = self.get_subreddit(sub_name)
-        return RedditResponseParser.parse_submissions_to_dict(sub.new(limit=limit))
+        submissions = sub.new(limit=limit)
+        return self._pretty_format(submissions, cast_to)
 
-    def get_hot(self, sub_name, limit=100):
+    def get_hot(self, sub_name, limit=100, cast_to='dict'):
         sub = self.get_subreddit(sub_name)
-        return RedditResponseParser.parse_submissions_to_dict(sub.hot(limit=limit))
+        submissions = sub.hot(limit=limit)
+        return self._pretty_format(submissions, cast_to)
 
     def get_subreddit(self, sub_name):
         return self.reddit.subreddit(sub_name)
+
+    @staticmethod
+    def _pretty_format(submissions, cast_to):
+        if cast_to == 'dict':
+            return RedditResponseParser.parse_submissions_to_dict(submissions)
+        elif cast_to == 'array':
+            return RedditResponseParser.parse_to_array(submissions)
+        elif cast_to == 'epoch':
+            return RedditResponseParser.parse_to_date_batch(submissions)
+        else:
+            return submissions

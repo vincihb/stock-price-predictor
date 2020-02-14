@@ -8,6 +8,8 @@ from client.util.charts.DataSet import DataSet
 from client.util.html.TableBuilder import TableBuilder
 from client.util.html.LinkBuider import LinkBuilder
 from client.util.html.ScrollableDiv import ScrollableDiv
+from nlu.NLUSubjectTickerEstimator import NLUSubjectTickerEstimator
+from reports.Sorting import Sorting
 
 
 def generate_report():
@@ -23,8 +25,7 @@ def generate_report():
         url = submissions['url'][sub]
         score = submissions['score'][sub]
 
-        sorted_bow = NLTKUtil.get_weighted_stock_count(title, self_text)
-        ticker = NLTKUtil.get_likely_subject_stock(sorted_bow)
+        ticker = NLUSubjectTickerEstimator.estimate(title, self_text)
 
         if ticker is None:
             continue
@@ -44,17 +45,9 @@ def generate_report():
             }
 
 
-    def sort_dict_by_score(item):
-        return item['score']
-
-
-    def sort_by_mentions(item):
-        return item[1]
-
-
     # sort the submissions by score
     for tf in tickers_found:
-        tickers_found[tf]['submissions'].sort(reverse=True, key=sort_dict_by_score)
+        tickers_found[tf]['submissions'].sort(reverse=True, key=Sorting.sort_by_score)
 
     # then reformat the result so that we can put it in a tabular format
     table_values = []
@@ -95,7 +88,7 @@ def generate_report():
     horizontal_ds.set_x(horizontal_x)
     horizontal_ds.append_y_set({'label': 'Sample', 'data': horizontal_y})
 
-    table_values.sort(key=sort_by_mentions, reverse=True)
+    table_values.sort(key=Sorting.sort_by_mentions, reverse=True)
 
     # and then mutate the data again to match the data format for bar charts
     x = []

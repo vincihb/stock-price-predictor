@@ -24,8 +24,12 @@ class Reporter:
     def set_body(self, body):
         self.body = HTMLUtil.wrap_in_tag(body, 'section', indent=2, one_line=False)
 
-    def append_to_body(self, html):
-        self.body += '\n\t\t<br />' + HTMLUtil.wrap_in_tag(html, 'section', indent=2, one_line=False)
+    def append_to_body(self, html, section_id=""):
+        if section_id == "":
+            self.body += '\n\t\t<br />' + HTMLUtil.wrap_in_tag(html, 'section', indent=2, one_line=False)
+        else:
+            self.body += '\n\t\t<br />' + HTMLUtil.wrap_in_tag(html, 'section', indent=2, one_line=False,
+                                                               attributes={"id": section_id})
 
     def set_summary(self, summary):
         self.summary = summary
