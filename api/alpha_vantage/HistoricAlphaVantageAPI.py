@@ -15,13 +15,16 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
     # User needs to input a datetime date class that is converted to a unique ordinal number
     def get_symbol_on_date(self, symbol, date, force_reload=False):
         print("Getting symbol %s" % (symbol,))
-        result = self.symbol_request_on_date(self.DAILY_URL, symbol, date, force_reload)
+        result = self.symbol_request_on_date(self.DAILY_URL, symbol, date, force_reload=force_reload)
         return result
 
     def symbol_request_on_date(self, url, symbol, date, retries=0, force_reload=False):
         api_url = url.replace('__SYMBOL__', symbol)
         result = self._try_cache(symbol, date)
-        if result is None or force_reload is True:
+        if result is None or force_reload:
+            if force_reload:
+                print('Forcing cache flush for %s' % (symbol,))
+
             result = json.loads(self.make_request(api_url))
 
             if result == 'Error' or 'Meta Data' not in result:
@@ -38,12 +41,16 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
                     print('HAV_API Timeout: Unable to get data for %s within retry limit' % (symbol,))
                     return None
 
-            self._store_data(symbol, result)
+            self._store_data(symbol, result, force_reload=force_reload)
             self._store_meta_data(symbol)
         return result
 
     # Stores the actual data we receive from Alpha Vantage into the cache
-    def _store_data(self, symbol, result):
+    def _store_data(self, symbol, result, force_reload=False):
+        if force_reload:
+            print('Flushing cache for %s' % (symbol,))
+            self._cache.flush(symbol)
+
         daily_time_series = result['Time Series (Daily)']
         for key in daily_time_series:
             a = ()
@@ -56,7 +63,7 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
             day_time_series = int(date_string[8:10])
             key_date = dt.date(year_time_series, month_time_series, day_time_series).toordinal()
             last_retrieved_date = self._cache.get_last_retrieved(symbol)
-            if last_retrieved_date is not None:
+            if last_retrieved_date is not None and force_reload is not True:
                 print("In cache, updating")
                 if key_date > last_retrieved_date:
                     self._cache.store_result_data(symbol, key_date, a)
@@ -77,3 +84,6 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
             return result
 
         return None
+
+api = HistoricAlphaVantageAPI()
+api.get_symbol_on_date('CGC', dt.date.today().toordinal(), force_reload=True)
