@@ -84,6 +84,3 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
             return result
 
         return None
-
-api = HistoricAlphaVantageAPI()
-api.get_symbol_on_date('CGC', dt.date.today().toordinal(), force_reload=True)
