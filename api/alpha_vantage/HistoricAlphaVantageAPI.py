@@ -20,7 +20,7 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
 
     def symbol_request_on_date(self, url, symbol, date, retries=0):
         api_url = url.replace('__SYMBOL__', symbol)
-        result = self.try_cache(symbol, date)
+        result = self._try_cache(symbol, date)
         if result is None:
             result = json.loads(self.make_request(api_url))
 
@@ -38,17 +38,18 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
                     print('HAV_API Timeout: Unable to get data for %s within retry limit' % (symbol,))
                     return None
 
-            self.store_data(symbol, result)
-            self.store_meta_data(symbol)
+            self._store_data(symbol, result)
+            self._store_meta_data(symbol)
         return result
 
     # Stores the actual data we receive from Alpha Vantage into the cache
-    def store_data(self, symbol, result):
+    def _store_data(self, symbol, result):
         daily_time_series = result['Time Series (Daily)']
         for key in daily_time_series:
             a = ()
             for item in daily_time_series[key]:
                 a = a + (daily_time_series[key][item],)
+
             date_string = key
             year_time_series = int(date_string[0:4])
             month_time_series = int(date_string[5:7])
@@ -65,13 +66,18 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
                 print("Not in cache, loading now")
                 self._cache.store_result_data(symbol, key_date, a)
 
-    def store_meta_data(self, symbol):
+    def _store_meta_data(self, symbol):
         return self._cache.store_result_meta_data(symbol, dt.date.today().toordinal())
 
     # Checks cache for symbol on specific date
-    def try_cache(self, symbol, date):
+    def _try_cache(self, symbol, date):
         result = self._cache.check_cache(symbol, date)
         if result is not None:
             print('Found data in cache!')
             return result
+
         return None
+
+
+api = HistoricAlphaVantageAPI()
+api.get_symbol_on_date('MSFT', dt.date(2019, 2, 15).toordinal())

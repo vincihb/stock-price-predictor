@@ -3,9 +3,9 @@ import os.path as path
 
 
 class SqlExecutor:
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, db_name="gpp-core.db"):
         self._local_dir = path.dirname(path.abspath(__file__))
-        self._db_path = path.join(self._local_dir, '..', 'data', 'sqlite', 'gpp-core.db')
+        self._db_path = path.join(self._local_dir, '..', 'data', 'sqlite', db_name)
         self.debug = debug
 
         db_exists = path.isfile(self._db_path)

@@ -4,7 +4,7 @@ from db.SqlExecutor import SqlExecutor
 
 class HAVCache:
     def __init__(self):
-        self.db = SqlExecutor()
+        self.db = SqlExecutor(db_name='gpp-long-term.db')
 
     def store_result_meta_data(self, ticker, last_retrieved):
         sql = 'INSERT INTO `HISTORIC_META_DATA` (TICKER, LAST_RETRIEVED) VALUES (?, ?)'
