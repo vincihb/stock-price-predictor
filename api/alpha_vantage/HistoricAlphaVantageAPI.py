@@ -5,6 +5,15 @@ import json
 import time
 
 
+def covert_to_array_of_dicts(array):
+    to_return = []
+    for item in array:
+        a = {'ticker': item[0], 'date': item[1], 'open': item[2], 'high': item[3], 'low': item[4],
+             'close': item[5], 'volume': item[6]}
+        to_return.append(a)
+    return to_return
+
+
 class HistoricAlphaVantageAPI(AlphaVantageAPI):
     DAILY_URL = AlphaVantageAPI.DAILY_URL.replace('__OUTPUT_SIZE__', 'full')
 
@@ -15,13 +24,22 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
     # User needs to input a datetime date class that is converted to a unique ordinal number
     def get_symbol_on_date(self, symbol, date, force_reload=False):
         print("Getting symbol %s" % (symbol,))
+        if isinstance(date, dt.date):
+            date = date.toordinal()
         result = self.symbol_request_on_date(self.DAILY_URL, symbol, date, force_reload=force_reload)
         return result
+
+    def get_data_window(self, symbol, date, window):
+        if isinstance(date, dt.date):
+            date = date.toordinal()
+        result = self._cache.get_rolling_window_quotes(symbol, date, window)
+        return covert_to_array_of_dicts(result)
 
     def symbol_request_on_date(self, url, symbol, date, retries=0, force_reload=False):
         api_url = url.replace('__SYMBOL__', symbol)
         result = self._try_cache(symbol, date)
-        if result is None or force_reload:
+        last_retrieved = self._cache.get_last_retrieved(symbol)
+        if (result is None or force_reload) and last_retrieved < date:
             if force_reload:
                 print('Forcing cache flush for %s' % (symbol,))
 
@@ -66,8 +84,10 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
             if last_retrieved_date is not None and force_reload is not True:
                 print("In cache, updating")
                 if key_date > last_retrieved_date:
-                    self._cache.store_result_data(symbol, key_date, a)
+                    print("Storing data")
+                    self._cache.store_result_data(symbol, key_date, last_retrieved_date, a)
                 else:
+                    print("Either not valid date, or past last retrieved")
                     break
             else:
                 print("Not in cache, loading now")

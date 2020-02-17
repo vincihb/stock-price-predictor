@@ -28,20 +28,14 @@ class HAVCache:
 
     # Checks whether specific date is actually in the cache
     def check_cache(self, ticker, date):
-        sql = 'SELECT * FROM `HISTORIC_META_DATA` WHERE TICKER=?'
-        result = self.db.exec_select(sql, (ticker,)).fetchone()
-        if result is None:
-            return None
-
-        found_timestamp = result[1]
-        if found_timestamp < date:
+        found_timestamp = self.get_last_retrieved(ticker)
+        if found_timestamp is None or found_timestamp < date:
             return None
 
         result = self.get_daily_quote(ticker, date)
         if result is None:
             return None
 
-        print(result)
         return {'ticker': result[0], 'date': result[1], 'open': result[2],
                 'high': result[3], 'low': result[4], 'close': result[5], 'volume': result[6]}
 
@@ -53,6 +47,14 @@ class HAVCache:
 
         found_timestamp = result[1]
         return found_timestamp
+
+    def get_rolling_window_quotes(self, ticker, ord_date, num_desired):
+        sql = 'SELECT * FROM `HISTORIC_DATA` WHERE TICKER=? AND DATE <= ? ORDER BY DATE DESC LIMIT ?'
+        result = self.db.exec_select(sql, (ticker, ord_date, num_desired)).fetchall()
+        return result
+
+    def get_time_data(self, ticker):
+        sql = 'SELECT * FROM `HISTORIC_DATA` WHERE TICKER=?'
 
     def get_daily_quote(self, ticker, date):
         sql = 'SELECT * FROM `HISTORIC_DATA` WHERE TICKER=? AND DATE=?'

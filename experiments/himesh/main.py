@@ -16,9 +16,10 @@ stemmer = SnowballStemmer("english")
 
 historic_stock_pricing = HistoricAlphaVantageAPI.HistoricAlphaVantageAPI()
 print(dt.date(2020, 1, 1).toordinal())
-a = historic_stock_pricing.get_symbol_on_date('TSLA', dt.date(2019, 2, 15).toordinal())
+a = historic_stock_pricing.get_symbol_on_date('TSLA', dt.date(2019, 2, 16))
 print(a)
-exit()
+b = historic_stock_pricing.get_data_window('TSLA', dt.date(2019, 2, 17), 5)
+print(b)
 
 PATH = path.dirname(path.abspath(__file__))
 PATH_POSITIVE = path.join(PATH, '..', '..', 'data', 'jargon', 'positive.txt')
