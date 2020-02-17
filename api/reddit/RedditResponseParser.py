@@ -12,7 +12,7 @@ class RedditResponseParser:
             "score": [],
             "id": [],
             "url": [],
-            "comms_num": [],
+            "num_comments": [],
             "created": [],
             "body": []
         }

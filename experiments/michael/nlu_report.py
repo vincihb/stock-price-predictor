@@ -1,6 +1,5 @@
 from api.reddit.RedditAPI import RedditAPI
 from api.alpha_vantage.AlphaVantageAPI import AlphaVantageAPI
-from nlu.NLTKUtil import NLTKUtil
 from client.Reporter import Reporter
 from client.util.HTMLUtil import HTMLUtil
 from client.util.ChartBuilder import ChartBuilder
@@ -13,7 +12,7 @@ from reports.Sorting import Sorting
 
 
 def generate_report():
-    # gather the current top 50 posts from WSB
+    # gather the current hot 1000 posts from WSB
     reddit = RedditAPI()
     submissions = reddit.get_hot('wallstreetbets', limit=1000)
 
@@ -44,7 +43,6 @@ def generate_report():
                 'description': ticker[2]
             }
 
-
     # sort the submissions by score
     for tf in tickers_found:
         tickers_found[tf]['submissions'].sort(reverse=True, key=Sorting.sort_by_score)
@@ -58,7 +56,8 @@ def generate_report():
         addendum = ''
         counter = 0
         for submission in tickers_found[tf]['submissions']:
-            addendum += LinkBuilder('[%d] - %d' % (counter, submission['score']), submission['link']).compile() + '<br />'
+            addendum += LinkBuilder('[%d] - %d' % (counter, submission['score']), submission['link']).compile() + \
+                        '<br />'
             counter += 1
 
         addendum = ScrollableDiv(addendum, '5rem').compile()
@@ -77,7 +76,8 @@ def generate_report():
                 'label': tf
             })
 
-            pct_in_tag = HTMLUtil.wrap_in_tag(pct_change, 'div', attributes={'class': 'negative' if '-' in pct_change else 'positive'})
+            pct_in_tag = HTMLUtil.wrap_in_tag(pct_change, 'div',
+                                              attributes={'class': 'negative' if '-' in pct_change else 'positive'})
         else:
             pct_in_tag = 'N/A'
 

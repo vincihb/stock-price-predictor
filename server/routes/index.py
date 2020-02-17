@@ -15,7 +15,10 @@ def index_routes(app):
     def index():
         report_path = path.join(client_path, 'compiled')
 
-        files = [f for f in listdir(report_path) if path.isfile(path.join(report_path, f))]
+        # read out and sort all compiled reports (ignore the README)
+        files = [f for f in listdir(report_path) if path.isfile(path.join(report_path, f)) and f != "README.md"]
+        files.sort()
+
         file_links = [LinkBuilder(text=f.replace('.html', ''), url='/report?name=' + f) for f in files]
         file_list = ListBuilder(list_items=file_links, list_header='Your Reports')
 
@@ -25,5 +28,6 @@ def index_routes(app):
         template = HTMLUtil.get_template('index.html')\
             .replace('$$__REPORTS__$$', file_list.compile())\
             .replace('$$__GEN_REPORTS__$$', button_list.compile())
+
         return template
 
