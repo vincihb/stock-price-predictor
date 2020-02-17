@@ -2,6 +2,7 @@ from api.reddit.RedditAPI import RedditAPI
 from api.util.Pickler import Pickler
 from nlu.NLUSubjectTickerEstimator import NLUSubjectTickerEstimator
 from os import path
+from praw.models import MoreComments
 
 
 class DailyDiscussion:
@@ -37,8 +38,11 @@ class DailyDiscussion:
                 "misc": []
             }
 
-            post.comments.replace_more(limit=None)
-            for comment in post.comments:
+            comments = self.resolve_all_comments(post.comments)
+            for comment in comments:
+                if isinstance(comment, MoreComments):
+                    continue
+
                 body = comment.body
 
                 ticker = NLUSubjectTickerEstimator.estimate('', body)
@@ -59,6 +63,16 @@ class DailyDiscussion:
             self._dump_to_cache(post_meta, post_file_name)
 
     @staticmethod
+    def resolve_all_comments(post_comments):
+        comments = list(post_comments)
+        while isinstance(comments[-1], MoreComments):
+            print('Getting more comments...')
+            more_comments = list(comments[-1].comments())
+            comments = comments[:-1] + more_comments
+
+        return comments
+
+    @staticmethod
     def _serialize_comment(comment):
         return {
             'link': comment.permalink,
@@ -66,7 +80,6 @@ class DailyDiscussion:
             'score': comment.score,
             'created': int(comment.created)
         }
-
 
     def _check_cache(self, post_id):
         return Pickler.load_obj(path.join(self._cache_path, post_id + ".pickle"))
