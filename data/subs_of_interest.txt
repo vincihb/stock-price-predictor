@@ -2,3 +2,4 @@ wallstreetbets
 options
 pennystocks
 investing
+stocks

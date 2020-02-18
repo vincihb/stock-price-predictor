@@ -22,9 +22,9 @@ class DailyDiscussion:
 
             post_file_name = str(int(post.created)) + '-' + post.id
 
-            # if self._check_cache(post_file_name) is not None:
-            #     print('Already cached results for post with ID: ' + post.id)
-            #     continue
+            if self._check_cache(post_file_name) is not None:
+                print('Already cached results for post with ID: ' + post.id)
+                continue
 
             # set up the collections
             post_meta = {
