@@ -61,6 +61,7 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
 
             self._store_data(symbol, result, force_reload=force_reload)
             self._store_meta_data(symbol)
+
         return result
 
     # Stores the actual data we receive from Alpha Vantage into the cache
