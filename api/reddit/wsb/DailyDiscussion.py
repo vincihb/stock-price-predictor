@@ -5,13 +5,23 @@ from os import path, listdir
 from praw.models import MoreComments
 from datetime import date
 
+
 class DailyDiscussion:
     def __init__(self):
         self._wsb = RedditAPI().get_subreddit(sub_name='wallstreetbets')
         self._local_dir = path.dirname(path.abspath(__file__))
         self._cache_path = path.join(self._local_dir, 'cache')
 
-    def get_daily_discussion(self):
+    def get_daily_discussion(self, for_date=None, strict_match=False):
+        if for_date is not None and isinstance(for_date, date):
+            for_date = for_date.toordinal()
+
+        # if we're passed a date, search to see if we have a match for the date already
+        if for_date is not None:
+            data = self._get_daily_discussion_meta(for_date, strict_match=strict_match)
+            if len(data) != 0:
+                return data
+
         results = self._wsb.search(query='flair:daily discussion', time_filter='all', sort="new")
         first = True
         for post in results:
@@ -27,10 +37,10 @@ class DailyDiscussion:
                 continue
 
             # set up the collections
-            post_meta = self.get_post_meta(post)
+            post_meta = self._get_post_meta(post)
             self._dump_to_cache(post_meta, post_file_name)
 
-    def get_post_meta(self, post):
+    def _get_post_meta(self, post):
         post_meta = {
             "title": post.title,
             "link": post.permalink,
@@ -66,14 +76,14 @@ class DailyDiscussion:
         post_meta['tickers'] = tickers
         return post_meta
 
-    def get_daily_discussion_meta(self, for_date):
+    def _get_daily_discussion_meta(self, for_date, strict_match=False):
         if isinstance(for_date, date):
             for_date = for_date.toordinal()
 
-        found_dd = self._is_in_cache(for_date)
+        found_dd = self._is_in_cache(for_date, strict_match=strict_match)
         return [self.get_from_cache(dd) for dd in found_dd]
 
-    def _is_in_cache(self, for_date, _from_fuzz=False):
+    def _is_in_cache(self, for_date, strict_match=False, _from_fuzz=False):
         if isinstance(for_date, date):
             for_date = for_date.toordinal()
 
@@ -81,7 +91,7 @@ class DailyDiscussion:
         files = [f for f in listdir(self._cache_path) if path.isfile(path.join(self._cache_path, f)) and f != "README.md"]
         # return an array of the files where its timestamp matches the date you're searching for
         found = [dd for dd in files if date.fromtimestamp(int(dd.split('-')[0])).toordinal() == for_date]
-        if len(found) == 0 and not _from_fuzz:
+        if len(found) == 0 and not _from_fuzz and not strict_match:
             return self.fuzz_for_dd(for_date)
 
         return found
