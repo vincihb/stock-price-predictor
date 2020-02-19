@@ -8,7 +8,7 @@ from reports.Sorting import Sorting
 
 class AlbinsonianHTML:
     @staticmethod
-    def get_ticker_table(tickers_found, lookup_thresh=3):
+    def get_ticker_table(tickers_found, lookup_thresh=3, force_reload=False):
         table_header = ['Ticker', 'Mentions', 'Name', 'Description', 'Movement', 'Links']
 
         norm_factor = 0
@@ -32,7 +32,7 @@ class AlbinsonianHTML:
 
             if tickers_found[tf]['count'] >= lookup_thresh - 1:
                 print('crawling AV for %s' % tf)
-                pct_change = AlphaVantageAPI().get_parsed_quote(tf)['10. change percent']
+                pct_change = AlphaVantageAPI().get_parsed_quote(tf, force_reload)['10. change percent']
                 pct_in_tag = HTMLUtil.wrap_in_tag(pct_change, 'div',
                                                   attributes={'class': 'negative' if '-' in pct_change else 'positive'})
             else:

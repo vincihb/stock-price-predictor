@@ -78,12 +78,12 @@ class AlphaVantageAPI:
 
         return self.symbol_request(prepared_url, symbol)
 
-    def get_quote(self, symbol):
+    def get_quote(self, symbol, force_reload=False):
         self._last_req_type = 'QUOTE'
-        return self.symbol_request(AlphaVantageAPI.QUOTE_URL, symbol)
+        return self.symbol_request(AlphaVantageAPI.QUOTE_URL, symbol, force_reload=force_reload)
 
-    def get_parsed_quote(self, symbol):
-        return self.get_quote(symbol)['Global Quote']
+    def get_parsed_quote(self, symbol, force_reload=False):
+        return self.get_quote(symbol, force_reload)['Global Quote']
 
     def get_weekly_data(self, symbol):
         self._last_req_type = 'WEEK'
@@ -93,10 +93,10 @@ class AlphaVantageAPI:
         self._last_req_type = 'DAY'
         return self.symbol_request(AlphaVantageAPI.DAILY_URL, symbol)
 
-    def symbol_request(self, url, symbol, retries=0):
+    def symbol_request(self, url, symbol, retries=0, force_reload=False):
         api_url = url.replace('__SYMBOL__', symbol)
-        result = self.try_cache(symbol)
-        if result is None:
+        result = self.try_cache(symbol, force_reload=force_reload)
+        if result is None or force_reload is True:
             result = json.loads(self.make_request(api_url))
 
             if result == 'Error' or 'Global Quote' not in result and 'Meta Data' not in result:
@@ -118,8 +118,8 @@ class AlphaVantageAPI:
 
         return result
 
-    def try_cache(self, symbol):
-        result = self._cache.check_cache(symbol, self._last_req_type)
+    def try_cache(self, symbol, force_reload=False):
+        result = self._cache.check_cache(symbol, self._last_req_type, force_reload=force_reload)
         if result is not None:
             print('Found data in cache!')
             result = result['payload']

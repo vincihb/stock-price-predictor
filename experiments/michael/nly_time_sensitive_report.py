@@ -9,6 +9,7 @@ from reports.Sorting import Sorting
 
 REPORT_TITLE = "NLU - Time Sensitive"
 TRIM_THRESH = 10
+FORCE_CACHE_RELOAD = False
 
 
 def generate_report(table_date=None):
@@ -74,9 +75,9 @@ def generate_report(table_date=None):
 
         # if you specify a date, allow generating a table for dates in the past
         if table_date is None and meta == most_recent_date:
-            table = AlbinsonianHTML.get_ticker_table(metadata['tickers'])
+            table = AlbinsonianHTML.get_ticker_table(metadata['tickers'], force_reload=FORCE_CACHE_RELOAD)
         elif table_date is not None and table_date == meta:
-            table = AlbinsonianHTML.get_ticker_table(metadata['tickers'])
+            table = AlbinsonianHTML.get_ticker_table(metadata['tickers'], force_reload=FORCE_CACHE_RELOAD)
 
         x.append(meta)
         for ticker in metadata['tickers']:
@@ -109,5 +110,4 @@ def generate_report(table_date=None):
     report.append_to_body(ChartBuilder(title="Mentions over Time", data_set=ds, chart_type='line'))
     report.compile()
 
-
-generate_report()
+    return report.title
