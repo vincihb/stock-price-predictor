@@ -69,14 +69,17 @@ class DailyDiscussion:
             body = comment.body
 
             ticker = NLUSubjectTickerEstimator.estimate('', body)
+            # we only want the ticker name as the key
             print(body, ticker)
             if ticker is None:
                 tickers['misc'].append(self._serialize_comment(comment))
-            elif ticker in tickers:
-                tickers[ticker]['count'] += 1
-                tickers[ticker]['submissions'].append(self._serialize_comment(comment))
+            elif ticker[0] in tickers:
+                ticker_key = ticker[0]
+                tickers[ticker_key]['count'] += 1
+                tickers[ticker_key]['submissions'].append(self._serialize_comment(comment))
             else:
-                tickers[ticker] = {
+                ticker_key = ticker[0]
+                tickers[ticker_key] = {
                     'count': 1,
                     'submissions': [self._serialize_comment(comment)],
                     'description': ticker[2]
