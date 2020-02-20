@@ -1,5 +1,7 @@
 import json
 import time
+from json import JSONDecodeError
+
 import requests as req
 from os import path
 
@@ -97,7 +99,10 @@ class AlphaVantageAPI:
         api_url = url.replace('__SYMBOL__', symbol)
         result = self.try_cache(symbol, force_reload=force_reload)
         if result is None or force_reload is True:
-            result = json.loads(self.make_request(api_url))
+            try:
+                result = json.loads(self.make_request(api_url))
+            except JSONDecodeError:
+                return AlphaVantageAPI.NOT_FOUND_RESPONSE
 
             if result == 'Error' or 'Global Quote' not in result and 'Meta Data' not in result:
                 if 'Error Message' in result:

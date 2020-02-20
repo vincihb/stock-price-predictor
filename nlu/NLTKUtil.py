@@ -1,9 +1,12 @@
 from nltk.corpus import stopwords
 from collections import Counter
-from string import punctuation
 import re
 from api.local_stocks.Ticker import Ticker
 from os import path
+
+# gotta remove the dollar sign... otherwise we can never match on it!
+MOD_PUNCTUATION = r"""!"#%&'()*+,-./:;<=>?@[\]^_`{|}~"""
+
 
 def create_not_ticker_list():
     local_path = path.dirname(path.abspath(__file__))
@@ -16,14 +19,15 @@ def create_not_ticker_list():
 
 NOT_TICKER_LIST = create_not_ticker_list()
 
+
 class NLTKUtil:
     @staticmethod
     def get_bag_of_words(corpus):
-        stop_words = list(punctuation) + stopwords.words('english')
+        stop_words = list(MOD_PUNCTUATION) + stopwords.words('english')
         bow = []
         for w in corpus.split():
             # if the last character is punctuation, split it off
-            if w[len(w) - 1] in punctuation:
+            if w[len(w) - 1] in MOD_PUNCTUATION:
                 w = w[:-1]
 
             if w not in stop_words:

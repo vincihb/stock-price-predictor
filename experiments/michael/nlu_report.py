@@ -56,7 +56,8 @@ def generate_report():
         addendum = ''
         counter = 0
         for submission in tickers_found[tf]['submissions']:
-            addendum += LinkBuilder('[%d] - %d' % (counter, submission['score']), submission['link']).compile() + \
+            addendum += LinkBuilder('[%d] - %d' % (counter, submission['score']),
+                                    'https://reddit.com' + submission['link']).compile() + \
                         '<br />'
             counter += 1
 
