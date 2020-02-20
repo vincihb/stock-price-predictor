@@ -5,6 +5,8 @@ from os import path, listdir
 from praw.models import MoreComments
 from datetime import date
 
+FORCE_RELOAD = False
+
 
 class DailyDiscussion:
     def __init__(self):
@@ -33,7 +35,7 @@ class DailyDiscussion:
 
             post_file_name = str(int(post.created)) + '-' + post.id
 
-            if self._check_cache(post_file_name) is not None:
+            if self._check_cache(post_file_name) is not None and not FORCE_RELOAD:
                 print('Already cached results for post with ID: ' + post.id)
                 continue
 
