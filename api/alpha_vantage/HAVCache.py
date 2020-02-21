@@ -4,7 +4,7 @@ from db.SqlExecutor import SqlExecutor
 
 class HAVCache:
     def __init__(self):
-        self.db = SqlExecutor(db_name='gpp-long-term.db', debug=True)
+        self.db = SqlExecutor(db_name='gpp-long-term.db')
 
     # check if we already have cached data for the provided date
     def has_data_for_date(self, ticker, date, include_today=False):
