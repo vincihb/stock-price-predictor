@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en-US">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>DD Sentiment Report: 2020-02-21</title>
+
+    <link rel="stylesheet" href="../css/bootstrap_v4_0_0.css" />
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            padding: 1rem;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        table tbody tr:hover {
+            background-color: #202020;
+        }
+
+        thead {
+            border-bottom: solid white 2px;
+        }
+
+        tr td, tr th {
+            padding: 0.5rem 1rem 0.5rem 0.1rem;
+        }
+
+        section#ticker-table {
+            max-height: 750px;
+            overflow-y: scroll;
+        }
+
+        .positive {
+            color: green;
+        }
+
+        .negative {
+            color: red;
+        }
+    </style>
+
+    <script src="../js/chart_js_2_9_3.js"></script>
+    <script>
+        window.chartColors = {
+            red: 'rgb(255, 99, 132)',
+            orange: 'rgb(255, 159, 64)',
+            yellow: 'rgb(255, 205, 86)',
+            green: 'rgb(75, 192, 192)',
+            blue: 'rgb(54, 162, 235)',
+            purple: 'rgb(153, 102, 255)',
+            grey: 'rgb(201, 203, 207)'
+        };
+    </script>
+    
+</head>
+<body>
+    <a href="../">Home</a>
+    <h1>Report DD Sentiment Report: 2020-02-21</h1>
+    
+	<main>
+		<section>
+	
+			<canvas id="Major_Index_Change_vs_Sentiment"></canvas>
+	
+            <script>
+                var ctx = document.getElementById('Major_Index_Change_vs_Sentiment').getContext('2d');
+                var chart = new Chart(ctx, {
+                    // The type of chart we want to create
+                    type: 'line',
+                
+                    // The data for our dataset
+                    data: {
+                        labels: ['2020-01-30', '2020-01-31', '2020-02-03', '2020-02-04', '2020-02-05', '2020-02-06', '2020-02-07', '2020-02-10', '2020-02-11', '2020-02-12', '2020-02-13', '2020-02-14', '2020-02-18', '2020-02-19', '2020-02-20'],
+                        datasets: [
+                            
+							{
+                                label: 'Major Indices Avg Change',
+                                backgroundColor: window.chartColors.red,
+                                borderColor: window.chartColors.red,
+                                data: [0.7889, -2.337, 0.7281, 0.688, 0.2674, -0.0616, -0.4065, 1.1357, -0.09, -0.0167, -0.0967, 0.1218, -0.1096, 0.0015, 0.5548],
+                                fill: false,
+                                pointRadius: 0,
+                                lineTension: 0,
+                                borderWidth: 2,
+                                yAxisID: 'A'
+                            },
+							{
+                                label: 'WSB Sentiment',
+                                backgroundColor: window.chartColors.orange,
+                                borderColor: window.chartColors.orange,
+                                data: [1.4281628723524746, 1.4405693709092426, 1.3601098369567546, 1.5088836749644088, 1.6849477090149458, 1.5480754045168053, 1.4710144302136916, 1.5789924576138739, 1.8106831933939478, 1.878425222845824, 1.4247044496743477, 1.681671436955211, 1.5753126197670173, 1.993195132374567, 2.133196721311476],
+                                fill: false,
+                                pointRadius: 0,
+                                lineTension: 0,
+                                borderWidth: 2,
+                                yAxisID: 'B'
+                            },
+							{
+                                label: 'Average Sentiment',
+                                backgroundColor: window.chartColors.yellow,
+                                borderColor: window.chartColors.yellow,
+                                data: [1.6345296355243057, 1.6345296355243057, 1.6345296355243057, 1.6345296355243057, 1.6345296355243057, 1.6345296355243057, 1.6345296355243057, 1.6345296355243057, 1.6345296355243057, 1.6345296355243057, 1.6345296355243057, 1.6345296355243057, 1.6345296355243057, 1.6345296355243057, 1.6345296355243057],
+                                fill: false,
+                                pointRadius: 0,
+                                lineTension: 0,
+                                borderWidth: 2,
+                                yAxisID: 'B'
+                            }
+                        ]
+                    },
+                
+                    options: {
+                        title: {
+                            display: true,
+                            text: 'Major Index Change vs Sentiment'
+                        },
+                        "scales": {
+                                    xAxes: [
+                                        {
+                                            gridLines: { color: "#444", zeroLineColor: '#888' },
+                                            scaleLabel: {
+                                                display: true,
+                                                labelString: 'Date',
+                                                fontColor:'#888',
+                                                fontSize: 10
+                                            }
+                                        }
+                                    ],
+                                    yAxes: [
+                                        {
+                                            gridLines: { color: "#444", zeroLineColor: '#888' },
+                                            scaleLabel: {
+                                                display: true,
+                                                labelString: 'Index % Change',
+                                                fontColor:'#888',
+                                                fontSize: 10
+                                            },
+                                            id: 'A',
+                                            type: 'linear',
+                                            position: 'left'
+                                        },
+                                        {
+                                            gridLines: { color: "#444", zeroLineColor: '#888' },
+                                            scaleLabel: {
+                                                display: true,
+                                                labelString: 'Sentiment Ratio',
+                                                fontColor:'#888',
+                                                fontSize: 10
+                                            },
+                                            id: 'B',
+                                            type: 'linear',
+                                            position: 'right'
+                                        }]
+                                },
+						
+                    }
+                });
+            </script>
+
+		</section>
+	</main>
+</body>
+</html>

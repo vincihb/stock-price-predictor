@@ -80,11 +80,7 @@ class BaseChart:
     def compile_data(self):
         self._data_string = ''
         for data in self._ys:
-            if 'color' in data:
-                color = data['color']
-            else:
-                color = self.get_next_color()
-
+            color = self.resolve_data_color(data)
             self._data_string += HTMLUtil.get_indent(7) + self.get_data_set_template()\
                                                               .replace(TITLE_FORMAT, data['label'])\
                                                               .replace(DATA_FORMAT, str(data['data']))\
@@ -113,6 +109,14 @@ class BaseChart:
     # Child classes should override this method to provide custom data set templates for chart.js
     def get_data_set_template(self):
         return DATA_SET_TEMPLATE
+
+    def resolve_data_color(self, data):
+        if 'color' in data:
+            color = data['color']
+        else:
+            color = self.get_next_color()
+
+        return color
 
     @staticmethod
     def resolve_options(opts):

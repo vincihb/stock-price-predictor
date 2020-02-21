@@ -18,6 +18,21 @@ POSITIVE_WORDS = read_sentiment_file_to_array('positive.txt')
 
 class SentimentAnalyzer:
     @staticmethod
+    def get_average_discussion_sentiment(dd_array):
+        pos = 0
+        neg = 0
+        ratio = 0
+        for d in dd_array:
+            positive, negative, s_ratio = SentimentAnalyzer.get_net_sentiment(d)
+            pos += positive
+            neg += negative
+            ratio += s_ratio
+
+        # return the average sentiment for all of the discussions for the trading day
+        n = len(dd_array)
+        return pos / n, neg / n, ratio / n
+
+    @staticmethod
     def get_net_sentiment(discussion):
         positive_sent = 0
         negative_sent = 0

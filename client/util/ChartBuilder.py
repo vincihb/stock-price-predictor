@@ -3,6 +3,8 @@ from client.util.charts.HorizontalBarChart import HorizontalBarChart
 from client.util.charts.PieChart import PieChart
 from client.util.charts.ScatterChart import ScatterChart
 from client.util.charts.LineChart import LineChart
+from client.util.charts.DoubleYLineChart import DoubleYLineChart
+
 
 '''
     Data Set Structure for charts:
@@ -25,6 +27,9 @@ class ChartBuilder:
         self._data_set = data_set
         self._x_label = x_label
         self._y_label = y_label
+        if data_set.get_y_label() is not None:
+            self._y_label = data_set.get_y_label()
+
         self.chart = None
 
     def get_chart(self):
@@ -37,8 +42,12 @@ class ChartBuilder:
             self.chart = ScatterChart(title=self._title, data_set=self._data_set, x_label=self._x_label,
                                       y_label=self._y_label)
         elif self._type == 'line':
-            self.chart = LineChart(title=self._title, data_set=self._data_set, x_label=self._x_label,
-                                   y_label=self._y_label)
+            if self._data_set.has_secondary_y():
+                self.chart = DoubleYLineChart(title=self._title, data_set=self._data_set, x_label=self._x_label,
+                                              y_label=self._y_label)
+            else:
+                self.chart = LineChart(title=self._title, data_set=self._data_set, x_label=self._x_label,
+                                       y_label=self._y_label)
         elif self._type == 'horizontal-bar':
             self.chart = HorizontalBarChart(title=self._title, data_set=self._data_set, x_label=self._x_label,
                                             y_label=self._y_label)

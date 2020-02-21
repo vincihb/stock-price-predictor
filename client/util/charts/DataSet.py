@@ -5,6 +5,9 @@ class DataSet:
     def __init__(self, from_data=None):
         self._x = []
         self._ys = []
+        self._y1_label = None
+        self._secondary_ys = []
+        self._y2_label = None
         self._start_date = None
         self._date_type = 'day'
 
@@ -31,8 +34,20 @@ class DataSet:
     def set_ys(self, ys):
         self._ys = ys
 
+    def set_y1_name(self, label):
+        self._y1_label = label
+
+    def get_y_label(self):
+        return self._y1_label
+
+    def set_y2_name(self, label):
+        self._y2_label = label
+
     def append_y_set(self, y):
         self._ys.append(y)
+
+    def append_secondary_axis_y_set(self, y):
+        self._secondary_ys.append(y)
 
     '''
         Set the start date if a date series is to be used with the y data sets
@@ -47,10 +62,22 @@ class DataSet:
         if len(self._x) == 0:
             self.generate_x()
 
-        return {
+        data_dict = {
             'x': self._x,
             'ys': self._ys
         }
+
+        if self._y1_label is not None:
+            data_dict['y1_label'] = self._y1_label
+
+        if self.has_secondary_y():
+            data_dict['secondary_ys'] = self._secondary_ys
+            data_dict['y2_label'] = self._y2_label
+
+        return data_dict
+
+    def has_secondary_y(self):
+        return len(self._secondary_ys) > 0
 
     def generate_x(self):
         data_len = len(self._ys[0]['data'])
