@@ -4,15 +4,27 @@ from db.SqlExecutor import SqlExecutor
 
 class HAVCache:
     def __init__(self):
-        self.db = SqlExecutor(db_name='gpp-long-term.db')
+        self.db = SqlExecutor(db_name='gpp-long-term.db', debug=True)
+
+    # check if we already have cached data for the provided date
+    def has_data_for_date(self, ticker, date, include_today=False):
+        # if the date is today... we need to update our cache always
+        if date == datetime.date.today().toordinal() and not include_today:
+            return False
+
+        found_date = self.get_last_retrieved(ticker)
+
+        # if the date in the metadata is greater than the requested date
+        # we already have data for this date, otherwise we need to go get it
+        return found_date > date
 
     def store_result_meta_data(self, ticker, last_retrieved):
-        sql = 'SELECT * FROM `HISTORIC_META_DATA` WHERE TICKER=?'
-        found = self.db.exec_select(sql, (ticker,))
+        found = self.get_last_retrieved(ticker)
+
         # if there's already a metadata record, just update it
         if found is not None:
             sql = 'UPDATE `HISTORIC_META_DATA` SET LAST_RETRIEVED=? WHERE TICKER=?'
-            self.db.exec_select(sql, (last_retrieved, ticker))
+            self.db.exec_insert(sql, (last_retrieved, ticker))
         else:
             sql = 'INSERT INTO `HISTORIC_META_DATA` (TICKER, LAST_RETRIEVED) VALUES (?, ?)'
             self.db.exec_insert(sql, (ticker, last_retrieved))
@@ -20,6 +32,12 @@ class HAVCache:
     def store_result_data(self, ticker, date, payload):
         sql = 'INSERT INTO `HISTORIC_DATA` (TICKER, DATE, OPEN, HIGH, LOW, CLOSE, VOLUME) ' \
               'VALUES(?, ?, ?, ?, ?, ?, ?)'
+
+        # check to make sure we're not overwriting something
+        data = self.get_daily_quote(ticker, date)
+        if data is not None:
+            self.db.exec_insert('DELETE FROM `HISTORIC_DATA` WHERE `TICKER`=? AND `DATE`=?', (ticker, date))
+
         to_send = (ticker, date)
         for item in payload:
             to_send = to_send + (item,)
@@ -28,8 +46,8 @@ class HAVCache:
 
     # Checks whether specific date is actually in the cache
     def check_cache(self, ticker, date):
-        found_timestamp = self.get_last_retrieved(ticker)
-        if found_timestamp is None or found_timestamp < date:
+        # don't try the DB before we know if the data will be there
+        if not self.has_data_for_date(ticker, date):
             return None
 
         result = self.get_daily_quote(ticker, date)
@@ -48,9 +66,12 @@ class HAVCache:
         found_timestamp = result[1]
         return found_timestamp
 
-    def get_rolling_window_quotes(self, ticker, ord_date, num_desired):
+    def get_rolling_window_quotes(self, ticker, end_date, num_desired):
+        if not self.has_data_for_date(ticker, end_date, include_today=True):
+            return None
+
         sql = 'SELECT * FROM `HISTORIC_DATA` WHERE TICKER=? AND DATE <= ? ORDER BY DATE DESC LIMIT ?'
-        result = self.db.exec_select(sql, (ticker, ord_date, num_desired)).fetchall()
+        result = self.db.exec_select(sql, (ticker, end_date, num_desired)).fetchall()
         return result
 
     def get_time_data(self, ticker):
@@ -64,4 +85,3 @@ class HAVCache:
     def flush(self, ticker):
         sql = 'DELETE FROM `HISTORIC_DATA` WHERE TICKER=?'
         self.db.exec_insert(sql, (ticker,))
-

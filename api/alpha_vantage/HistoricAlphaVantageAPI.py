@@ -17,12 +17,22 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
         print("Getting symbol %s" % (symbol,))
         if isinstance(date, dt.date):
             date = date.toordinal()
+
         result = self.symbol_request_on_date(self.DAILY_URL, symbol, date, force_reload=force_reload)
         return result
 
     def get_data_window(self, symbol, date, window):
         if isinstance(date, dt.date):
             date = date.toordinal()
+
+        # try the cache for the last day of the window (i.e. latest in time)
+        # if the data is there for that date, we should be good for all the other dates
+        cached_date = self._try_cache(symbol, date)
+        if cached_date is None:
+            # if the date isn't there, we need to request to repopulate the cache
+            self.get_symbol_on_date(symbol, date=date)
+
+        # finally we can get our data
         result = self._cache.get_rolling_window_quotes(symbol, date, window)
         return self.covert_to_array_of_dicts(result)
 
@@ -61,6 +71,7 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
             print('Flushing cache for %s' % (symbol,))
             self._cache.flush(symbol)
 
+        last_retrieved_date = self._cache.get_last_retrieved(symbol)
         daily_time_series = result['Time Series (Daily)']
         for key in daily_time_series:
             a = ()
@@ -72,12 +83,11 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
             month_time_series = int(date_string[5:7])
             day_time_series = int(date_string[8:10])
             key_date = dt.date(year_time_series, month_time_series, day_time_series).toordinal()
-            last_retrieved_date = self._cache.get_last_retrieved(symbol)
             if last_retrieved_date is not None and force_reload is not True:
                 print("In cache, updating")
                 if key_date > last_retrieved_date:
                     print("Storing data")
-                    self._cache.store_result_data(symbol, key_date, last_retrieved_date, a)
+                    self._cache.store_result_data(symbol, key_date, a)
                 else:
                     print("Either not valid date, or past last retrieved")
                     break
@@ -100,10 +110,18 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
     @staticmethod
     def covert_to_array_of_dicts(array):
         to_return = []
-        for item in array:
-            a = {'ticker': item[0], 'date': item[1], 'open': item[2], 'high': item[3], 'low': item[4],
-                 'close': item[5], 'volume': item[6]}
+        if array is None:
+            return to_return
 
-            to_return.append(a)
+        for item in array:
+            to_return.append({
+                'ticker': item[0],
+                'date': item[1],
+                'open': item[2],
+                'high': item[3],
+                'low': item[4],
+                'close': item[5],
+                'volume': item[6]
+            })
 
         return to_return
