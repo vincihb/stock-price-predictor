@@ -45,7 +45,7 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
         if last_retrieved is None:
             last_retrieved = -1
 
-        if (result is None or force_reload) and last_retrieved < date:
+        if (result is None or force_reload) and last_retrieved <= date:
             if force_reload:
                 print('Forcing cache flush for %s' % (symbol,))
 
@@ -90,7 +90,7 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
             key_date = dt.date(year_time_series, month_time_series, day_time_series).toordinal()
             if last_retrieved_date is not None and force_reload is not True:
                 print("In cache, updating")
-                if key_date > last_retrieved_date:
+                if key_date >= last_retrieved_date:
                     print("Storing data")
                     self._cache.store_result_data(symbol, key_date, a)
                 else:
