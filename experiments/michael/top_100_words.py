@@ -17,10 +17,8 @@ def get_top_n_words_in_last_m_discussions(n=100, m=10):
     dd = DailyDiscussion().get_n(n=m)
     c = Counter()
     for d in dd:
-        tickers = d['tickers']
         d_counter = SentimentAnalyzer.get_counter_for_dd(d)
         c.update(d_counter)
-
 
     print("Top %d Words Found:")
     for word in c.most_common(n):
