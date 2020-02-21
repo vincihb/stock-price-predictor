@@ -16,7 +16,7 @@ class HAVCache:
 
         # if the date in the metadata is greater than the requested date
         # we already have data for this date, otherwise we need to go get it
-        return found_date > date
+        return found_date > date or (include_today and date == datetime.date.today().toordinal())
 
     def store_result_meta_data(self, ticker, last_retrieved):
         found = self.get_last_retrieved(ticker)

@@ -39,7 +39,12 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
     def symbol_request_on_date(self, url, symbol, date, retries=0, force_reload=False):
         api_url = url.replace('__SYMBOL__', symbol)
         result = self._try_cache(symbol, date)
+
+        # if we've never retrieved for the ticker, set its last retrieved to -1 so the < op doesn't blow up
         last_retrieved = self._cache.get_last_retrieved(symbol)
+        if last_retrieved is None:
+            last_retrieved = -1
+
         if (result is None or force_reload) and last_retrieved < date:
             if force_reload:
                 print('Forcing cache flush for %s' % (symbol,))
