@@ -1,8 +1,17 @@
 put
 puts
 bear
+bears
 bearish
 loss
 short
 down
 stumbled
+shit
+sell
+sold
+red
+dip
+selling
+hold
+holding

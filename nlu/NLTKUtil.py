@@ -12,7 +12,7 @@ def create_not_ticker_list():
     local_path = path.dirname(path.abspath(__file__))
     path_to_list = path.join(local_path, '..', 'data', 'jargon', 'not_tickers.txt')
     with open(path_to_list) as file_data:
-         not_tickers_list = [line.strip() for line in file_data]
+        not_tickers_list = [line.strip() for line in file_data]
 
     return not_tickers_list
 
@@ -22,7 +22,13 @@ NOT_TICKER_LIST = create_not_ticker_list()
 
 class NLTKUtil:
     @staticmethod
-    def get_bag_of_words(corpus):
+    def get_bag_of_words(corpus, custom_trim_words=None, length_filter=None):
+        if custom_trim_words is None:
+            custom_trim_words = []
+
+        if length_filter is None:
+            length_filter = 0
+
         stop_words = list(MOD_PUNCTUATION) + stopwords.words('english')
         bow = []
         for w in corpus.split():
@@ -30,7 +36,7 @@ class NLTKUtil:
             if w[len(w) - 1] in MOD_PUNCTUATION:
                 w = w[:-1]
 
-            if w not in stop_words:
+            if w not in stop_words and w != '' and w not in custom_trim_words and len(w) > length_filter:
                 bow.append(w)
 
         return bow

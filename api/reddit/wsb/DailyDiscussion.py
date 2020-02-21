@@ -100,7 +100,9 @@ class DailyDiscussion:
             for_date = for_date.toordinal()
 
         # read out the files in the cache
-        files = [f for f in listdir(self._cache_path) if path.isfile(path.join(self._cache_path, f)) and f != "README.md"]
+        files = [f for f in listdir(self._cache_path) if
+                 path.isfile(path.join(self._cache_path, f)) and f != "README.md"]
+
         # return an array of the files where its timestamp matches the date you're searching for
         found = [dd for dd in files if date.fromtimestamp(int(dd.split('-')[0])).toordinal() == for_date]
         if len(found) == 0 and not _from_fuzz and not strict_match:
@@ -116,6 +118,13 @@ class DailyDiscussion:
             return self._fuzz_for_dd(last_date, _current_depth + 1)
 
         return dd
+
+    def get_n(self, n=10):
+        files = [f for f in listdir(self._cache_path) if
+                 path.isfile(path.join(self._cache_path, f)) and f != "README.md"]
+
+        files = files[0:n]
+        return [self._get_from_cache(f) for f in files]
 
     @staticmethod
     def _resolve_all_comments(post_comments):
