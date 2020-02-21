@@ -5,15 +5,6 @@ import json
 import time
 
 
-def covert_to_array_of_dicts(array):
-    to_return = []
-    for item in array:
-        a = {'ticker': item[0], 'date': item[1], 'open': item[2], 'high': item[3], 'low': item[4],
-             'close': item[5], 'volume': item[6]}
-        to_return.append(a)
-    return to_return
-
-
 class HistoricAlphaVantageAPI(AlphaVantageAPI):
     DAILY_URL = AlphaVantageAPI.DAILY_URL.replace('__OUTPUT_SIZE__', 'full')
 
@@ -33,7 +24,7 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
         if isinstance(date, dt.date):
             date = date.toordinal()
         result = self._cache.get_rolling_window_quotes(symbol, date, window)
-        return covert_to_array_of_dicts(result)
+        return self.covert_to_array_of_dicts(result)
 
     def symbol_request_on_date(self, url, symbol, date, retries=0, force_reload=False):
         api_url = url.replace('__SYMBOL__', symbol)
@@ -105,3 +96,14 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
             return result
 
         return None
+
+    @staticmethod
+    def covert_to_array_of_dicts(array):
+        to_return = []
+        for item in array:
+            a = {'ticker': item[0], 'date': item[1], 'open': item[2], 'high': item[3], 'low': item[4],
+                 'close': item[5], 'volume': item[6]}
+
+            to_return.append(a)
+
+        return to_return
