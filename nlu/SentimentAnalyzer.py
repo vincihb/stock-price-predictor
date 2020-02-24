@@ -17,6 +17,7 @@ POSITIVE_WORDS = read_sentiment_file_to_array('positive.txt')
 
 
 class SentimentAnalyzer:
+    # Look at the range of post and return the score for all the tickers mentioned
     @staticmethod
     def get_net_sentiment_historic(range_of_posts):
         to_return = []
@@ -29,18 +30,13 @@ class SentimentAnalyzer:
 
             if ticker is not None:
                 ticker_symbol = ticker[0]
-                print(ticker_symbol)
             else:
                 continue
 
             positive_match, negative_match = SentimentAnalyzer.get_positive_and_negative_matches(bag_of_words)
-
-            print("Positive match: " + str(positive_match))
-            print("Negative match: " + str(negative_match))
             score = positive_match - negative_match
-            print("Score: " + str(score))
-
             to_return.append((ticker_symbol, score))
+
         return to_return
 
     @staticmethod
