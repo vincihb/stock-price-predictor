@@ -43,6 +43,8 @@ class HistoricRedditAPI:
     def get_something(self):
         posts = self.api.search_submissions(after=self._start,
                                             subreddit=self._subreddit,
-                                            filter=['author', 'title', 'subreddit', 'body', 'selftext'],
+                                            sort="asc",
+                                            filter=['author', 'title', 'subreddit', 'body', 'selftext', 'created_utc'],
                                             limit=self._limit)
         return list(posts)
+
