@@ -3,6 +3,7 @@ from flask import request
 from client.util.HTMLUtil import HTMLUtil
 from experiments.michael.nlu_report import generate_report
 from experiments.michael.nly_time_sensitive_report import generate_report as gen_nly_report
+from api.reddit.wsb.DailyDiscussion import DailyDiscussion
 from experiments.himesh.historic_sensitivity_report import generate_report as gen_his_sen
 
 
@@ -27,5 +28,8 @@ def report_routes(app):
         elif report_type == 'Historic_Sensitivity':
             title = gen_his_sen()
             return '{"report_title": "/report?name=%s"}' % (title + '.html',)
+        elif report_type == 'Refresh_DD':
+            DailyDiscussion().get_daily_discussion()
+            return '{success: true}'
 
         return 'Error, invalid report type', 500

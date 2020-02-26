@@ -4,7 +4,7 @@ from client.util.html.ButtonBuilder import ButtonBuilder
 from client.util.html.ListBuilder import ListBuilder
 from client.util.html.LinkBuider import LinkBuilder
 
-valid_report_types = ['NLU', 'NLU_Timing', 'Historic_Sensitivity']
+valid_report_types = ['NLU', 'NLU_Timing', 'Refresh_DD', 'Historic_Sensitivity']
 
 
 def index_routes(app):
