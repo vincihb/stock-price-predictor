@@ -67,5 +67,4 @@ def generate_report():
     report.compile()
 
 
-
 generate_report()
