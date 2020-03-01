@@ -29,7 +29,8 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
             # if the date isn't there, we need to request to repopulate the cache
             self.get_symbol_on_date(symbol, date=dt.date.today().toordinal())
 
-        return self._cache.get_all_data(symbol)
+        result = self._cache.get_all_data(symbol)
+        return self._covert_to_array_of_dicts(result)
 
     def get_data_window(self, symbol, date, window):
         if isinstance(date, dt.date):
@@ -44,7 +45,7 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
 
         # finally we can get our data
         result = self._cache.get_rolling_window_quotes(symbol, date, window)
-        return self.covert_to_array_of_dicts(result)
+        return self._covert_to_array_of_dicts(result)
 
     def symbol_request_on_date(self, url, symbol, date, retries=0, force_reload=False):
         api_url = url.replace('__SYMBOL__', symbol)
@@ -123,7 +124,7 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
         return None
 
     @staticmethod
-    def covert_to_array_of_dicts(array):
+    def _covert_to_array_of_dicts(array):
         to_return = []
         if array is None:
             return to_return
