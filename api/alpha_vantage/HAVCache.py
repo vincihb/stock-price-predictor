@@ -16,6 +16,7 @@ class HAVCache:
         # if no found date, then it isn't in the cache at all
         if found_date is None:
             return False
+
         # if the date in the metadata is greater than the requested date
         # we already have data for this date, otherwise we need to go get it
         return found_date > date or (include_today and date == datetime.date.today().toordinal())

@@ -22,18 +22,14 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
         return result
 
     def get_all_data(self, symbol):
-        last_retrieved_date = self._cache.get_last_retrieved(symbol)
-        if last_retrieved_date is None:
-            result = self.load_data_to_cache(self, symbol)
+        # try the cache for the last day of the window (i.e. latest in time)
+        # if the data is there for that date, we should be good for all the other dates
+        has_data = self._cache.has_data_for_date(symbol, dt.date.today())
+        if not has_data:
+            # if the date isn't there, we need to request to repopulate the cache
+            self.get_symbol_on_date(symbol, date=dt.date.today().toordinal())
 
-        return result
-
-    # TODO: finish
-    def load_data_to_cache(self, ticker):
-        api_url = self.DAILY_URL.replace('__SYMBOL__', ticker)
-        result = json.loads(self.make_request(api_url))
-        
-        return ticker
+        return self._cache.get_all_data(symbol)
 
     def get_data_window(self, symbol, date, window):
         if isinstance(date, dt.date):
