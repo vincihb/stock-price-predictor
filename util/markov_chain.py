@@ -7,7 +7,4 @@ class MarkovChain:
         self.ticker = ticker
 
     def build_markov_chain(self):
-
-
-
-
+        pass
