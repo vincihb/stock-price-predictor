@@ -13,11 +13,11 @@ class HAVCache:
         if found_date is None:
             return False
 
-        # found_date is saturday or sunday
+        # found_date is saturday or sunday and is today, don't update cache
         if DateUtil.dates_match(date, found_date) and DateUtil.is_weekend(date) and DateUtil.is_today(date):
             return True
 
-        # if the date is today... we need to update our cache always
+        # if the date is today and it isn't the weekend, we need to update our cache always
         if DateUtil.is_today(date) and not no_update_if_today:
             return False
 
