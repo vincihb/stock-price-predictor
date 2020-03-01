@@ -25,8 +25,10 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
         last_retrieved_date = self._cache.get_last_retrieved(symbol)
         if last_retrieved_date is None:
             result = self.load_data_to_cache(self, symbol)
+
         return result
 
+    # TODO: finish
     def load_data_to_cache(self, ticker):
         api_url = self.DAILY_URL.replace('__SYMBOL__', ticker)
         result = json.loads(self.make_request(api_url))
