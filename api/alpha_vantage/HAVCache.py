@@ -68,6 +68,11 @@ class HAVCache:
         found_timestamp = result[1]
         return found_timestamp
 
+    def get_all_data(self, ticker):
+        sql = 'SELECT * FROM `HISTORIC_DATA` WHERE TICKER=?'
+        result = self.db.exec_select(sql, (ticker,)).fetchall()
+        return result
+
     def get_rolling_window_quotes(self, ticker, end_date, num_desired):
         if not self.has_data_for_date(ticker, end_date, include_today=True):
             return None
@@ -75,9 +80,6 @@ class HAVCache:
         sql = 'SELECT * FROM `HISTORIC_DATA` WHERE TICKER=? AND DATE <= ? ORDER BY DATE DESC LIMIT ?'
         result = self.db.exec_select(sql, (ticker, end_date, num_desired)).fetchall()
         return result
-
-    def get_time_data(self, ticker):
-        sql = 'SELECT * FROM `HISTORIC_DATA` WHERE TICKER=?'
 
     def get_daily_quote(self, ticker, date):
         sql = 'SELECT * FROM `HISTORIC_DATA` WHERE TICKER=? AND DATE=?'

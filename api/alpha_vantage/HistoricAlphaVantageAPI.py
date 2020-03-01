@@ -21,6 +21,18 @@ class HistoricAlphaVantageAPI(AlphaVantageAPI):
         result = self.symbol_request_on_date(self.DAILY_URL, symbol, date, force_reload=force_reload)
         return result
 
+    def get_all_data(self, symbol):
+        last_retrieved_date = self._cache.get_last_retrieved(symbol)
+        if last_retrieved_date is None:
+            result = self.load_data_to_cache(self, symbol)
+        return result
+
+    def load_data_to_cache(self, ticker):
+        api_url = self.DAILY_URL.replace('__SYMBOL__', ticker)
+        result = json.loads(self.make_request(api_url))
+        
+        return ticker
+
     def get_data_window(self, symbol, date, window):
         if isinstance(date, dt.date):
             date = date.toordinal()
