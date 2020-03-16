@@ -24,25 +24,15 @@ class MarkovChain:
         self._normalize()
         return self.markov_chain
 
+    # TODO: show underlying distribution in a report, dont' sample!
     def predict(self):
         latest_percentage = self.historic_percentage_data[len(self.historic_percentage_data) - 1]
         row_index = self._linear_index_map(latest_percentage)
-        prediction = np.random.choice(self.size_of_matrix, 1, p=self.markov_chain[row_index, :])
-        prediction = self._linear_percentage_map(prediction[0])
-        print("Predict a " +str(prediction) + "% change in stock value")
-        return prediction
-
-    # TODO: Store using np.save
-    def store_markov_chain(self):
-        pass
-
-    # TODO: very descriptive title
-    def check_markov_chain_exists(self):
-        pass
-
-    # TODO: you know
-    def update_markov_chain(self):
-        pass
+        y = []
+        for index in range(len(self.markov_chain[row_index, :])):
+            y.append(self._linear_percentage_map(index))
+        print("Predict a " + str(self.markov_chain[row_index, :]) + "% change in stock value")
+        return self.markov_chain[row_index, :], np.array(y)
 
     def _normalize(self):
         for row_index in range(self.markov_chain.shape[0]):
