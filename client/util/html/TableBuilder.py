@@ -1,3 +1,5 @@
+from client.util.html.tooling.table.TableElement import TableElement
+
 BASE_INDENT = 3
 
 
@@ -9,32 +11,12 @@ class TableBuilder:
         if headers is None:
             headers = []
 
-        self._compiled_html = ''
-        self._headers = headers
-        self._rows = rows
+        self._table = TableElement()
+        self._table.set_column_headers(headers)
+        self._table.add_multiple_rows(rows)
 
     def compile(self):
-        self._compiled_html = '<table>'
-
-        t_head = '\n\t<thead>\n\t\t<tr>'
-        for header in self._headers:
-            t_head = t_head + '\n\t\t\t<th>' + str(header) + '</th>'
-
-        t_head = t_head + '\n\t\t</tr>\n\t</thead>'
-
-        t_body = '\n\t<tbody>'
-        for row in self._rows:
-            t_body = t_body + '\n\t\t<tr>'
-            for column in row:
-                t_body = t_body + '\n\t\t\t<td>' + str(column) + '</td>'
-
-            t_body = t_body + '\n\t\t</tr>'
-
-        t_body = t_body + '\n\t</tbody>'
-
-        self._compiled_html = self._compiled_html + t_head + t_body + '\n\t</table>'
-
-        return self._compiled_html
+        return self._table.render(indent=BASE_INDENT)
 
     def __str__(self):
         return self.compile()

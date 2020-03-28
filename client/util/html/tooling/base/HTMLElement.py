@@ -55,7 +55,9 @@ class HTMLElement:
         return self.query_selector(tag_name)
 
     def render(self, indent=1):
-        self._attrs[Attributes.CLASS] = ' '.join(self._class_list)
+        if len(self._class_list) > 0:
+            self._attrs[Attributes.CLASS] = ' '.join(self._class_list)
+
         if len(self._children) == 0:
             return HTMLUtil.wrap_in_tag(self._text, self._node_type, indent, self._attrs, one_line=True)
 
