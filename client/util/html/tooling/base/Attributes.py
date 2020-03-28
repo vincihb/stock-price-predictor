@@ -5,3 +5,4 @@ class Attributes:
     ID = 'id'
     SRC = 'src'
     ALT = 'alt'
+    STYLE = 'style'

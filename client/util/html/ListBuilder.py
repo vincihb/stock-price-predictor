@@ -1,4 +1,6 @@
-from client.util.HTMLUtil import HTMLUtil
+from client.util.html.tooling.Header2Element import Header2Element
+from client.util.html.tooling.list.OrderedListElement import OrderedListElement
+from client.util.html.tooling.list.UnorderedListElement import UnorderedListElement
 
 BASE_INDENT = 3
 
@@ -11,29 +13,27 @@ class ListBuilder:
         if list_items is None:
             list_items = []
 
-        self._list_items = list_items
+        self._header = None
+        if list_header != '':
+            self._header = Header2Element(list_header)
+
+        if list_type == self.UNORDERED:
+            self._list = UnorderedListElement()
+        else:
+            self._list = OrderedListElement()
+
+        for item in list_items:
+            self._list.add_item(item)
+
         self._list_header = list_header
-        self._list_type = list_type
-        self._compiled_html = ''
 
     def compile(self):
-        if self._list_header != '':
-            self._compiled_html = HTMLUtil.wrap_in_tag(self._list_header, 'h2', BASE_INDENT)
+        compiled = ''
+        if self._header is not None:
+            compiled = self._header.render()
 
-        if self._list_type == ListBuilder.ORDERED:
-            self._compiled_html += HTMLUtil.get_indent(BASE_INDENT) + '<ol>'
-        else:
-            self._compiled_html += HTMLUtil.get_indent(BASE_INDENT) + '<ul>'
-
-        for item in self._list_items:
-            self._compiled_html += HTMLUtil.wrap_in_tag(item, 'li', BASE_INDENT + 1)
-
-        if self._list_type == ListBuilder.ORDERED:
-            self._compiled_html += HTMLUtil.get_indent(BASE_INDENT) + '</ol>'
-        else:
-            self._compiled_html += HTMLUtil.get_indent(BASE_INDENT) + '</ul>'
-
-        return self._compiled_html
+        compiled += self._list.render()
+        return compiled
 
     def __str__(self):
         return self.compile()

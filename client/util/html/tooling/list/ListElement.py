@@ -13,6 +13,6 @@ class ListElement(HTMLElement):
         else:
             list_item.set_inner_text(child_data)
 
-        self.append_child(child_data)
+        self.append_child(list_item)
 
 

@@ -1,4 +1,5 @@
 from client.util.HTMLUtil import HTMLUtil
+from client.util.html.tooling.ButtonElement import ButtonElement
 
 
 class ButtonBuilder:
@@ -6,15 +7,14 @@ class ButtonBuilder:
         if attrs is None:
             attrs = {}
 
-        self._text = text
-        self._attrs = attrs
-        self._attrs['id'] = button_id
-        self._attrs['class'] = 'btn btn-primary gen-report'
+        self._button = ButtonElement(text=text, button_id=button_id)
+        for attr in attrs:
+            self._button.set_attribute(attr, attrs[attr])
+
         self._compiled_html = ''
 
     def compile(self):
-        self._compiled_html = HTMLUtil.wrap_in_tag(self._text, 'button', one_line=True, attributes=self._attrs)
-        return self._compiled_html
+        return self._button.render()
 
     def __str__(self):
         return self.compile()

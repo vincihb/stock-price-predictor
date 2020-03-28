@@ -1,15 +1,12 @@
-from client.util.HTMLUtil import HTMLUtil
+from client.util.html.tooling.LinkElement import LinkElement
 
 
 class LinkBuilder:
     def __init__(self, text='', url=''):
-        self._text = text
-        self._url = url
-        self._compiled_html = ''
+        self._link = LinkElement(text, url, target='_blank')
 
     def compile(self):
-        self._compiled_html = HTMLUtil.wrap_in_tag(self._text, 'a', one_line=True, attributes={'href': self._url, 'target': '_blank'})
-        return self._compiled_html
+        return self._link.render()
 
     def __str__(self):
         return self.compile()

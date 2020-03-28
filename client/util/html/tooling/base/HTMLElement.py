@@ -1,4 +1,5 @@
 from client.util.HTMLUtil import HTMLUtil
+from client.util.html.tooling.base.Attributes import Attributes
 
 
 class HTMLElement:
@@ -54,12 +55,15 @@ class HTMLElement:
         return self.query_selector(tag_name)
 
     def render(self, indent=1):
+        self._attrs[Attributes.CLASS] = ' '.join(self._class_list)
         if len(self._children) == 0:
             return HTMLUtil.wrap_in_tag(self._text, self._node_type, indent, self._attrs, one_line=True)
 
         child_markup = ''
         for child in self._children:
-            child_markup += child.render(indent=indent+1)
+            if isinstance(child, HTMLElement):
+                child_markup += child.render(indent=indent + 1)
+            else:
+                child_markup += str(child)
 
         return HTMLUtil.wrap_in_tag(child_markup, self._node_type, indent, self._attrs, one_line=False)
-

@@ -99,7 +99,7 @@ class MarkovChain:
 
 
 if __name__ == "__main__":
-    mc = MarkovChain('BEP')
+    mc = MarkovChain('TSLA')
     markov_chain = mc.build_markov_chain()
     mc.predict()
     print("Hello")
