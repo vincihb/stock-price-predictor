@@ -4,7 +4,7 @@ from client.util.html.ButtonBuilder import ButtonBuilder
 from client.util.html.ListBuilder import ListBuilder
 from client.util.html.LinkBuider import LinkBuilder
 
-valid_report_types = ['NLU', 'NLU_Timing', 'Refresh_DD', 'Historic_Sensitivity']
+valid_report_types = ['NLU', 'NLU_Timing', 'Refresh_DD', 'Markov_Chain']
 
 
 def index_routes(app):
@@ -23,7 +23,7 @@ def index_routes(app):
         file_list = ListBuilder(list_items=file_links, list_header='Your Reports')
 
         buttons = [ButtonBuilder(text='New ' + b + ' Report', button_id=b, attrs={"data-type": b}) for b in valid_report_types]
-        button_list = ListBuilder(list_items=buttons, list_header='Generate Reports')
+        button_list = ListBuilder(list_items=buttons, list_header=' Generate Reports')
 
         template = HTMLUtil.get_template('index.html')\
             .replace('$$__REPORTS__$$', file_list.compile())\

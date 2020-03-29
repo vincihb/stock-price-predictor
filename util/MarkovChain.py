@@ -2,12 +2,74 @@ import numpy as np
 from api.alpha_vantage.HistoricAlphaVantageAPI import HistoricAlphaVantageAPI
 
 
+def trim(x, y):
+    min_y_index = find_min(y)
+    max_y_index = find_max(y)
+    print(min_y_index)
+    print(max_y_index)
+    if min_y_index == 0:
+        min_y_index = 1
+    if max_y_index == x.size - 1:
+        max_y_index = x.size - 2
+    if min_y_index is None or max_y_index is None:
+        return None, None
+    x, y = remove_zeros(x[min_y_index - 1: max_y_index + 2], y[min_y_index - 1: max_y_index + 2])
+    return x, y
+
+
+# TODO: Check if array is size zero
+def remove_zeros(x, y):
+    x_array = [x[0]]
+    y_array = [y[0]]
+    for index in range(1, y.size - 1):
+        if y[index] > 0:
+            x_array.append(x[index])
+            y_array.append(y[index])
+    x_array.append(x[x.size - 1])
+    y_array.append(y[y.size - 1])
+    return np.array(x_array), np.array(y_array)
+
+
+def find_min(array):
+    print("Array Size is: ")
+    print(array.size)
+    print("#######")
+    for index in range(array.size):
+        if array[index] > 0:
+            return index
+
+    return None
+
+
+def find_max(array):
+    for index in range(array.size - 1, 0, -1):
+        if array[index] > 0:
+            return index
+
+    return None
+
+
 class MarkovChain:
     def __init__(self, ticker):
         self.ticker = ticker
         self.historic_data = HistoricAlphaVantageAPI()
         self.ticker_data = self.historic_data.get_all_data(self.ticker)
         self._build_historic_percentage_data()
+
+    @staticmethod
+    def expected_value(x, y):
+        mu = 0
+        for index in range(x.size):
+            mu += x[index] * y[index]
+        return mu
+
+    @staticmethod
+    def var(x, y):
+        mu = MarkovChain.expected_value(x, y)
+        sigma = 0
+        for index in range(x.size):
+            sigma += x[index] * x[index] * y[index]
+        return sigma - mu * mu
 
     def build_markov_chain(self):
         largest_gain, largest_loss = self._biggest_one_day_gain_loss()
@@ -24,15 +86,18 @@ class MarkovChain:
         self._normalize()
         return self.markov_chain
 
-    # TODO: show underlying distribution in a report, dont' sample!
-    def predict(self):
-        latest_percentage = self.historic_percentage_data[len(self.historic_percentage_data) - 1]
-        row_index = self._linear_index_map(latest_percentage)
-        y = []
+    def _predict_past_percentage(self, past_percentage):
+        row_index = self._linear_index_map(past_percentage)
+        x = []
         for index in range(len(self.markov_chain[row_index, :])):
-            y.append(self._linear_percentage_map(index))
+            x.append(self._linear_percentage_map(index))
         print("Predict a " + str(self.markov_chain[row_index, :]) + "% change in stock value")
-        return self.markov_chain[row_index, :], np.array(y)
+        return trim(np.array(x), self.markov_chain[row_index, :])
+
+    def predict(self):
+        latest_percentage = self.historic_percentage_data[len(self.historic_percentage_data) - 2]
+        x, y = self._predict_past_percentage(latest_percentage)
+        return x, y
 
     def _normalize(self):
         for row_index in range(self.markov_chain.shape[0]):
@@ -68,8 +133,9 @@ class MarkovChain:
         indicator = 0
         for item in self.ticker_data:
             open_price = float(item['open'])
-            if indicator != 0:
-                self.historic_percentage_data.append((previous_close - open_price)/ previous_close * 100)
+            # Store after hour trading data
+            # if indicator != 0:
+                # self.historic_percentage_data.append((open_price - previous_close) / previous_close * 100)
             indicator = 1
             close_price = float(item['close'])
             self.historic_percentage_data.append((close_price - open_price) / open_price * 100)

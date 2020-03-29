@@ -4,7 +4,7 @@ from client.util.HTMLUtil import HTMLUtil
 from experiments.michael.nlu_report import generate_report
 from experiments.michael.nly_time_sensitive_report import generate_report as gen_nly_report
 from api.reddit.wsb.DailyDiscussion import DailyDiscussion
-from experiments.himesh.historic_sensitivity_report import generate_report as gen_his_sen
+from experiments.himesh.mc_report import generate_report as gen_mc_sen
 
 
 def report_routes(app):
@@ -25,8 +25,8 @@ def report_routes(app):
         elif report_type == 'NLU_Timing':
             title = gen_nly_report()
             return '{"report_title": "/report?name=%s"}' % (title + '.html',)
-        elif report_type == 'Historic_Sensitivity':
-            title = gen_his_sen()
+        elif report_type == 'Markov_Chain':
+            title = gen_mc_sen()
             return '{"report_title": "/report?name=%s"}' % (title + '.html',)
         elif report_type == 'Refresh_DD':
             DailyDiscussion().get_daily_discussion()
