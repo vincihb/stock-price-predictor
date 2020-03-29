@@ -65,6 +65,3 @@ def generate_report():
     report.set_title('DD Sentiment Report')
     report.set_body(chart)
     report.compile()
-
-
-generate_report()
