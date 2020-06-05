@@ -130,7 +130,7 @@ class DailyDiscussion:
     def _resolve_all_comments(post_comments):
         comments = list(post_comments)
         while isinstance(comments[-1], MoreComments):
-            print('Getting more comments...')
+            print('Getting more comments %d...' % len(comments))
             more_comments = list(comments[-1].comments())
             comments = comments[:-1] + more_comments
 
