@@ -1,5 +1,7 @@
-# glowing-pancake-praw
+# Stock Price Predictor
 A project to construct heatmaps of stock tickers mentioned on key reddit threads and perform sentiment analysis.
+
+To run Markov chains, please run `python3 experiments/himesh/mc_report.py`. It will create a report in `client/compiled` folder.
 
 ## Required setup:
 ### Populate the config directory
